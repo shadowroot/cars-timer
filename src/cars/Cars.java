@@ -3,11 +3,14 @@
  * and open the template in the editor.
  */
 package cars;
-import com.sun.xml.internal.ws.util.StringUtils;
+import gnu.io.CommPortIdentifier;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.Date;
+import java.util.Enumeration;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenuItem;
 import javax.swing.Timer;
 
 /**
@@ -19,6 +22,8 @@ private static String[][] credentials;
 private static String[][] racersReady = null;
 private static String[][] tmpcsv=null;
 private static int[] positions = null;
+private static int[] ids = null;
+private static int[] laps = null;
 private static racers racers = null;
 private static mainFrame mainFrame = null;
 private static String csv = new String();
@@ -31,8 +36,11 @@ private static String[] cols=null;
 private static int id=0;
 private static Date date=null;
 private static long start_time=0;
+private static long stop_time=0;
 private static long[] times=null;
 private static long now_time=0;
+private static String cPort = "COM3";
+private static JCheckBoxMenuItem[] com_ports;
 
     public Cars() throws IOException{
         initRacers();
@@ -87,6 +95,7 @@ private static long now_time=0;
        racersReady=new String[racInt.length][3];
        for(int i=0;i<racInt.length;i++){
            racersReady[i]=credentials[racInt[i]];
+           ids[i]=racInt[i]; 
        }
     }
     
@@ -111,11 +120,44 @@ private static long now_time=0;
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args){
         // TODO code application logic here
-        //serial = new serial();
-        initRacers();
+        //serial.main(args);
         mainFrame = new mainFrame();
+        Enumeration e = CommPortIdentifier.getPortIdentifiers();
+        int i=0;
+         String name="";
+         com_ports = new JCheckBoxMenuItem[1];
+        while(e.hasMoreElements()){
+            JCheckBoxMenuItem[] temp = new JCheckBoxMenuItem[(i+1)];
+            temp=com_ports; 
+            com_ports=temp;
+          CommPortIdentifier cpi = (CommPortIdentifier)e.nextElement(); 
+          name=cpi.getName();
+        com_ports[i] = new JCheckBoxMenuItem();
+        com_ports[i].setSelected(true);
+        com_ports[i].setText(name);
+        com_ports[i].setActionCommand(name);
+        
+        
+        com_ports[i].addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cPort = evt.getActionCommand();
+                for(int i=0;i<com_ports.length;i++){
+                    if(com_ports[i] != evt.getSource()){
+                        com_ports[i].setSelected(false);
+                    }
+                }
+            }
+        });
+        mainFrame.getComMenu().add(com_ports[i]);
+        i++;
+          
+        
+        }
+        //initRacers();
+        
+        
         /*
         if(debug){
             test t = new test();
@@ -141,8 +183,34 @@ private static long now_time=0;
     }
     public static void breakLine(){
         date=new Date();
-        now_time = date.getTime();
-        
+        stop_time = date.getTime();
+    }
+    public static void positionDet(int id){
+        now_time=(new Date()).getTime();
+        times[id]=stop_time;
+        long tmp =0;
+        long tp = getMax(times);
+        while(times[times.length-1] == tp)
+        for(int i=0;i<ids.length;i++){
+            tmp = now_time-times[i];
+            if(tmp < now_time-times[ids[i]]){
+                positions[i] = i;
+                times[i] = stop_time;
+            }
+        }
+    }
+    public static long getMax(long[] data){
+        long tmp=0;
+        int id=0;
+        int i=0;
+            for(i=0;i<data.length;i++){
+                if(tmp < data[i]){
+                    tmp=data[i];
+                    id=i;
+                }
+            }
+            
+        return tmp;
     }
     public static void updateGraphics(){
         Race.updatePanels(credentials, times);
