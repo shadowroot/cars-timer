@@ -3,6 +3,7 @@
  * and open the template in the editor.
  */
 package cars;
+
 import gnu.io.CommPortIdentifier;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,7 +11,6 @@ import java.io.*;
 import java.util.Date;
 import java.util.Enumeration;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenuItem;
 import javax.swing.Timer;
 
 /**
@@ -18,9 +18,10 @@ import javax.swing.Timer;
  * @author jonny
  */
 public class Cars {
-private static String[][] credentials;
+public static String[][] credentials=null;
 private static String[][] racersReady = null;
 private static String[][] tmpcsv=null;
+private static String[] tmpStringArr=null;
 private static int[] positions = null;
 private static int[] ids = null;
 private static int[] laps = null;
@@ -29,10 +30,10 @@ private static mainFrame mainFrame = null;
 private static String csv = new String();
 private static String csvFile = "racers.csv";
 private static serial serial = null;
-private static char[] tmp = null;
+private static String tmp = null;
 private static int maxSize = 0x800;
 private static boolean debug = true;
-private static String[] cols=null;
+private static int cols=3;
 private static int id=0;
 private static Date date=null;
 private static long start_time=0;
@@ -41,49 +42,70 @@ private static long[] times=null;
 private static long now_time=0;
 private static String cPort = "COM3";
 private static JCheckBoxMenuItem[] com_ports;
+private static long[][] results=null;//lap results +-
+private static int[] places = null;//racers places
 
     public Cars() throws IOException{
         initRacers();
     }
     
+    
+    
     public static void putCredentials(String[] str) throws IOException{
-        tmpcsv = new String[credentials.length+1][3];
-        credentials = tmpcsv;
+        tmpcsv = new String[credentials.length+1][cols];
+        functions.cpyArrays(credentials[credentials.length-1], tmpcsv[tmpcsv.length-1]);
+        credentials=tmpcsv;
         credentials[credentials.length-1] = str;
         writeCSV(str);
     }
     
-    public static void readCSV(String str) throws IOException{
+    public static void readCSV(String str,String[][] table) throws IOException{
         
-        tmp = new char[maxSize];
+        String line = new String();
         FileReader fstream = new FileReader(str);
         try {
             BufferedReader bReader = new BufferedReader(fstream);
-            bReader.read(tmp);
+            while((line=bReader.readLine()) != null){
+                tmp+=line;
+            }
         }
-        catch (Exception e){
+        catch (IOException e){
             e.printStackTrace();
+            
         }
-        csv = tmp.toString();
-        char[] buf = new char[csv.length()];
-        buf=csv.toCharArray();
-        int size = 0;
-        for(int i=0;i<buf.length;i++){
-            if(buf[i] == (char)','){
-                size++;
+        int i=0;
+        int p=0;
+        
+        String[] aSplited = tmp.split(",");
+        table = new String[aSplited.length/cols][cols];
+        while(i<aSplited.length-1){
+            for(int u=0;u<cols;u++){
+                table[p][u] = aSplited[i];
+                i++;
+            }
+        p++;
+        
+        }
+        putCredentialis(table);
+    }
+    
+    public static void putCredentialis(String[][] table){
+        int i=0;
+        
+        if(credentials != null){
+            tmpcsv = new String[table.length+credentials.length][cols];
+            for(i=0;i<credentials.length;i++){
+                functions.cpyArrays(credentials[i], tmpcsv[i]);
             }
         }
-        cols=new String[size];
-        cols = csv.split(",");
-        id=0;
-        for(int i = 0;i<cols.length;i+=3){
-           tmpcsv = new String[credentials.length+1][3];
-            credentials = tmpcsv;
-            for(int u=0;u<3;u++){
-                credentials[id][u] = cols[i+u];
-            }
-            id++;
+        else{
+            tmpcsv = new String[table.length][cols];
         }
+        for(int u=0;u<table.length;u++){
+            tmpcsv[i+u]=table[u];
+        }
+        credentials=tmpcsv;
+        
     }
     
     
@@ -92,50 +114,59 @@ private static JCheckBoxMenuItem[] com_ports;
      */
     public static void determineRacers(int[] racInt){
        
-       racersReady=new String[racInt.length][3];
+       racersReady=new String[racInt.length][cols];
        for(int i=0;i<racInt.length;i++){
            racersReady[i]=credentials[racInt[i]];
-           ids[i]=racInt[i]; 
+           
+           
        }
+       Race r = new Race();
+       Race.putCredentials(racersReady);
+       
+       
     }
     
     public static void writeCSV(String[] str) throws IOException{
         FileWriter fstream = new FileWriter(csvFile);
-        try (BufferedWriter bWriter = new BufferedWriter(fstream)) {
+        try{
+            BufferedWriter bWriter = new BufferedWriter(fstream);
             for(int i=0;i<str.length;i++){
                 csv += str[i]+",";
             }
             System.out.println(csv);
             bWriter.write(csv);
         }
+        catch(Exception e){
+            e.printStackTrace();
+            
+        }
         
     }
     public static void initRacers() throws IOException{
         date = new Date();
         System.out.println(date.toString());
-        readCSV(csvFile);
-        
+        readCSV(csvFile,credentials);
+        mainFrame.addRacers(credentials);
     }
     
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException{
         // TODO code application logic here
         //serial.main(args);
         mainFrame = new mainFrame();
         Enumeration e = CommPortIdentifier.getPortIdentifiers();
+        
         int i=0;
          String name="";
-         com_ports = new JCheckBoxMenuItem[1];
+         com_ports = new JCheckBoxMenuItem[3];
+       
         while(e.hasMoreElements()){
-            JCheckBoxMenuItem[] temp = new JCheckBoxMenuItem[(i+1)];
-            temp=com_ports; 
-            com_ports=temp;
           CommPortIdentifier cpi = (CommPortIdentifier)e.nextElement(); 
           name=cpi.getName();
         com_ports[i] = new JCheckBoxMenuItem();
-        com_ports[i].setSelected(true);
+        com_ports[i].setSelected(false);
         com_ports[i].setText(name);
         com_ports[i].setActionCommand(name);
         
@@ -152,7 +183,7 @@ private static JCheckBoxMenuItem[] com_ports;
         });
         mainFrame.getComMenu().add(com_ports[i]);
         i++;
-          
+        
         
         }
         //initRacers();
@@ -163,24 +194,14 @@ private static JCheckBoxMenuItem[] com_ports;
             test t = new test();
         }
         */
+        initRacers();  
         
     }
     public static void newRaces(){
         racers = new racers();
     }
-    public static void racerList(){
-        
-    }
-    public static void newRace(){
-        Race r = new Race();
-        Timer t = new Timer(1000,new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateGraphics();
-            }
-        });
-        t.start();
-    }
+    
+    
     public static void breakLine(){
         date=new Date();
         stop_time = date.getTime();
@@ -213,6 +234,6 @@ private static JCheckBoxMenuItem[] com_ports;
         return tmp;
     }
     public static void updateGraphics(){
-        Race.updatePanels(credentials, times);
+        
     }
 }

@@ -20,7 +20,6 @@ public class test {
      */
     public static void main() 
     {
-        System.out.println("start");
         Enumeration ports = CommPortIdentifier.getPortIdentifiers();
         
         while(ports.hasMoreElements())

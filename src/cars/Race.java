@@ -4,17 +4,37 @@
  */
 package cars;
 
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.Date;
+
+import javax.swing.*;
+
 /**
  *
  * @author jonny
  */
-public class Race extends javax.swing.JFrame {
+public class Race extends javax.swing.JFrame implements KeyListener {
+private static JPanel jPanel1=null;
+private static String[][] credentials=null;
+private static long[][] laps=null;
+private static long[] tmpTimes=null;
+private static int[] tmpIndexes=null;
+private static boolean change=false;
+private static long start=0;
+private static JLabel[] racers = null;
+
 
     /**
      * Creates new form Race
      */
     public Race() {
         initComponents();
+        this.setVisible(true);
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
     }
 
     /**
@@ -26,11 +46,51 @@ public class Race extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        timeLabel = new javax.swing.JLabel();
+        jButton3 = new javax.swing.JButton();
+        racersPanel = new javax.swing.JPanel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jButton1.setText("Exit");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText("Start");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        timeLabel.setFont(new java.awt.Font("Tahoma", 1, 36)); // NOI18N
+        timeLabel.setText(""+new Date().toString()+"");
+
+        jButton3.setText("Opravit");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout racersPanelLayout = new javax.swing.GroupLayout(racersPanel);
+        racersPanel.setLayout(racersPanelLayout);
+        racersPanelLayout.setHorizontalGroup(
+            racersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 233, Short.MAX_VALUE)
+        );
+        racersPanelLayout.setVerticalGroup(
+            racersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 267, Short.MAX_VALUE)
+        );
 
         jMenu1.setText("File");
         jMenuBar1.add(jMenu1);
@@ -44,60 +104,178 @@ public class Race extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButton1)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton2)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton3))
+                    .addComponent(timeLabel))
+                .addGap(28, 28, 28)
+                .addComponent(racersPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 279, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(34, 34, 34)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(racersPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(timeLabel)
+                        .addGap(228, 228, 228)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton1)
+                            .addComponent(jButton2)
+                            .addComponent(jButton3))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        this.setVisible(false);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        Date d = new Date();
+        start = d.getTime();
+        start_race();
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        change=true;
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private static void start_race(){
+        paint_time();
+        
+    }
+    
+    private static void refresh_panel(){
+        
+    }
+    
+    private static void plug_racers(){
+        racers = new JLabel[credentials.length];
+        laps = new long[credentials.length][1];
+        for(int i=0;i<credentials.length;i++){
+            racers[i] = new JLabel();
+            racers[i].setText(i+" "+credentials[i][0]+"  "+credentials[i][1] + "  " + laps[i][laps[i].length-1]);
+            racers[i].setSize(1000, 20);
+            racers[i].setLocation(20, i*30);
+            racersPanel.add(racers[i]);
+        }
+        racersPanel.repaint();
+    }
+    
+    private static void paint_time(){
+        Timer t = new Timer(10, new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Date t = new Date();
+                Date now = new Date(t.getTime()-start);
+                long milis = now.getTime()%1000;
+                String h = new String();
+                long hours = (now.getTime()/1000)/60;
+                if(hours>0 && hours<1){
+                    h = hours+":";
+                }
+                else{
+                    h="";
+                }
+                timeLabel.setText(h+now.getMinutes()+":"+now.getSeconds()+"."+milis);
+            }
+        });
+        t.start();
+    }
+    
+    public static void updatePanels(String[][] str, long[] times) {
+        
+    }
+    
+    public static void putCredentials(String[][] arStr){
+        credentials=arStr;
+        plug_racers();
+    }
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /*
-         * Set the Nimbus look and feel
-         */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /*
-         * If Nimbus (introduced in Java SE 6) is not available, stay with the
-         * default look and feel. For details see
-         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Race.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Race.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Race.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Race.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /*
-         * Create and display the form
-         */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
-            public void run() {
-                new Race().setVisible(true);
-            }
-        });
-    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
+    private static javax.swing.JPanel racersPanel;
+    private static javax.swing.JLabel timeLabel;
     // End of variables declaration//GEN-END:variables
+    public static void serial(int val){
+        Date now = new Date();
+        
+        long[] tmp = new long[tmpTimes.length+1];
+        if(tmpTimes != null){
+            functions.cpyArrays(tmpTimes, tmp);
+        }
+        
+        tmpTimes[tmpTimes.length-1]=now.getTime();
+        
+    }
+    
+    public static  void lap_times(){
+        plug_racers();
+    }
+    
+    
+    @Override
+    public void keyPressed(KeyEvent e) {
+        //Add next field
+        
+
+    }
+    /*
+     * @Override public void keyReleased(KeyEvent e) { throw new
+     * UnsupportedOperationException("Not supported yet."); }
+     *
+     */
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        
+        if (e.getKeyCode() == '`' || e.getKeyCode() == '~' || e.getKeyCode() == ';') {
+            
+        }
+        //Numbers
+        if (e.getKeyChar() >= 0x31 && e.getKeyChar() <= 0x39) {
+            if(change){
+                
+            }
+            else{
+                if(tmpTimes != null && tmpTimes.length>0){
+                    int u= e.getKeyChar()-0x30;//id of racer
+                    for(int i=0;i<tmpTimes.length;i++){
+                        long[] tmp = new long[laps[i].length+1];
+                        if(laps[u] != null){
+                            System.arraycopy(laps[i], 0, tmp, 0, laps[i].length);
+                        }
+                        tmp[tmp.length-1] = tmpTimes[tmpTimes.length-1];
+                        
+                        laps[u]=tmp;
+                    }
+                }
+            }
+        }
+       
+        
+    }
 }
