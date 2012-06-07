@@ -10,9 +10,12 @@ import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.Date;
 import java.util.Enumeration;
+import javax.sound.sampled.Control.Type;
+import javax.sound.sampled.Line.Info;
+import javax.sound.sampled.*;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.Timer;
-
+import sun.audio.*;
 /**
  *
  * @author jonny
@@ -38,12 +41,16 @@ private static int id=0;
 private static Date date=null;
 private static long start_time=0;
 private static long stop_time=0;
-private static long[] times=null;
+private static long tmpTime = 0;
+private static long[][] times=null;
 private static long now_time=0;
 private static String cPort = "COM3";
 private static JCheckBoxMenuItem[] com_ports;
 private static long[][] results=null;//lap results +-
 private static int[] places = null;//racers places
+private static InputStream sound = null;
+private static AudioStream asBreak=null;
+
 
     public Cars() throws IOException{
         initRacers();
@@ -155,16 +162,17 @@ private static int[] places = null;//racers places
     public static void main(String[] args) throws IOException{
         // TODO code application logic here
         //serial.main(args);
+        sound = new FileInputStream("sounds/breaksound.wav");
         mainFrame = new mainFrame();
         Enumeration e = CommPortIdentifier.getPortIdentifiers();
         
         int i=0;
-         String name="";
+         
          com_ports = new JCheckBoxMenuItem[3];
        
         while(e.hasMoreElements()){
           CommPortIdentifier cpi = (CommPortIdentifier)e.nextElement(); 
-          name=cpi.getName();
+          String name=cpi.getName();
         com_ports[i] = new JCheckBoxMenuItem();
         com_ports[i].setSelected(false);
         com_ports[i].setText(name);
@@ -172,6 +180,7 @@ private static int[] places = null;//racers places
         
         
         com_ports[i].addActionListener(new java.awt.event.ActionListener() {
+                @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cPort = evt.getActionCommand();
                 for(int i=0;i<com_ports.length;i++){
@@ -202,11 +211,16 @@ private static int[] places = null;//racers places
     }
     
     
-    public static void breakLine(){
-        date=new Date();
-        stop_time = date.getTime();
+    public static void breakLine() throws IOException, InterruptedException{
+        asBreak = new AudioStream(sound);
+        AudioPlayer.player.start(asBreak);
+       
+        Race.serial();
     }
+    
+    
     public static void positionDet(int id){
+        /*
         now_time=(new Date()).getTime();
         times[id]=stop_time;
         long tmp =0;
@@ -219,6 +233,12 @@ private static int[] places = null;//racers places
                 times[i] = stop_time;
             }
         }
+        * 
+        */
+        
+        
+        
+        
     }
     public static long getMax(long[] data){
         long tmp=0;

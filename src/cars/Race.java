@@ -21,11 +21,15 @@ public class Race extends javax.swing.JFrame implements KeyListener {
 private static JPanel jPanel1=null;
 private static String[][] credentials=null;
 private static long[][] laps=null;
+private static int lastLap = 0;
 private static long[] tmpTimes=null;
+private static char[] KeyPressed = new char[20];
 private static int[] tmpIndexes=null;
 private static boolean change=false;
 private static long start=0;
 private static JLabel[] racers = null;
+private static boolean racerReady = false;
+private static long[] interuptionRow=null;
 
 
     /**
@@ -34,6 +38,7 @@ private static JLabel[] racers = null;
     public Race() {
         initComponents();
         this.setVisible(true);
+        jLabel1.setText("");
         setDefaultCloseOperation(HIDE_ON_CLOSE);
     }
 
@@ -51,6 +56,7 @@ private static JLabel[] racers = null;
         timeLabel = new javax.swing.JLabel();
         jButton3 = new javax.swing.JButton();
         racersPanel = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
@@ -92,6 +98,8 @@ private static JLabel[] racers = null;
             .addGap(0, 267, Short.MAX_VALUE)
         );
 
+        jLabel1.setText("jLabel1");
+
         jMenu1.setText("File");
         jMenuBar1.add(jMenu1);
 
@@ -107,13 +115,15 @@ private static JLabel[] racers = null;
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(timeLabel)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButton1)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel1)
+                            .addComponent(jButton1))
                         .addGap(18, 18, 18)
                         .addComponent(jButton2)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton3))
-                    .addComponent(timeLabel))
+                        .addComponent(jButton3)))
                 .addGap(28, 28, 28)
                 .addComponent(racersPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -126,7 +136,9 @@ private static JLabel[] racers = null;
                     .addComponent(racersPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(timeLabel)
-                        .addGap(228, 228, 228)
+                        .addGap(39, 39, 39)
+                        .addComponent(jLabel1)
+                        .addGap(175, 175, 175)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jButton1)
                             .addComponent(jButton2)
@@ -179,17 +191,19 @@ private static JLabel[] racers = null;
             @Override
             public void actionPerformed(ActionEvent e) {
                 Date t = new Date();
-                Date now = new Date(t.getTime()-start);
-                long milis = now.getTime()%1000;
+                long now = t.getTime()-start;
+                long milis = now%1000;
                 String h = new String();
-                long hours = (now.getTime()/1000)/60;
+                long hours = (((now/1000)/60)/60)%24;
+                long seconds = (now/1000)%60;
+                long minutes = ((now/1000)/60)%60;
                 if(hours>0 && hours<1){
                     h = hours+":";
                 }
                 else{
                     h="";
                 }
-                timeLabel.setText(h+now.getMinutes()+":"+now.getSeconds()+"."+milis);
+                timeLabel.setText(h+""+minutes+":"+seconds+"."+milis);
             }
         });
         t.start();
@@ -210,13 +224,14 @@ private static JLabel[] racers = null;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private static javax.swing.JLabel jLabel1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private static javax.swing.JPanel racersPanel;
     private static javax.swing.JLabel timeLabel;
     // End of variables declaration//GEN-END:variables
-    public static void serial(int val){
+    public static void serial(){
         Date now = new Date();
         
         long[] tmp = new long[tmpTimes.length+1];
@@ -225,6 +240,8 @@ private static JLabel[] racers = null;
         }
         
         tmpTimes[tmpTimes.length-1]=now.getTime();
+        racerReady=true;
+        jLabel1.setText("Zmáčkněte číslo závodníka ....");
         
     }
     
@@ -235,7 +252,7 @@ private static JLabel[] racers = null;
     
     @Override
     public void keyPressed(KeyEvent e) {
-        //Add next field
+        char key = e.getKeyChar();
         
 
     }
@@ -251,29 +268,42 @@ private static JLabel[] racers = null;
 
     @Override
     public void keyReleased(KeyEvent e) {
-        
-        if (e.getKeyCode() == '`' || e.getKeyCode() == '~' || e.getKeyCode() == ';') {
+        char key = e.getKeyChar();
+        if (key == '`' || key == '~' || key == ';') {
             
         }
         //Numbers
-        if (e.getKeyChar() >= 0x31 && e.getKeyChar() <= 0x39) {
+        if (key >= '1' && key <= '9') {
+            
+            
+            
+            
+            
+            
             if(change){
-                
+                tmpTimes = new long[laps.length+1];
+                functions.cpyArrays(laps[key], tmpTimes);
+                laps[key][laps[key].length-1] = laps[lastLap][laps[lastLap].length-1];
             }
             else{
-                if(tmpTimes != null && tmpTimes.length>0){
-                    int u= e.getKeyChar()-0x30;//id of racer
-                    for(int i=0;i<tmpTimes.length;i++){
-                        long[] tmp = new long[laps[i].length+1];
-                        if(laps[u] != null){
-                            System.arraycopy(laps[i], 0, tmp, 0, laps[i].length);
+                if(racerReady){
+                    if(tmpTimes != null && tmpTimes.length>0){
+                        int u = (int)key;
+                        for(int i=0;i<tmpTimes.length;i++){
+                            long[] tmp = new long[laps[i].length+1];
+                            if(laps[u] != null){
+                                System.arraycopy(laps[i], 0, tmp, 0, laps[i].length);
+                            }
+                            tmp[tmp.length-1] = tmpTimes[tmpTimes.length-1];
+
+                            laps[u]=tmp;
                         }
-                        tmp[tmp.length-1] = tmpTimes[tmpTimes.length-1];
-                        
-                        laps[u]=tmp;
                     }
                 }
             }
+            racerReady=false;
+            jLabel1.setText("");
+            
         }
        
         
