@@ -5,21 +5,18 @@
 package cars;
 
 import gnu.io.CommPortIdentifier;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.Date;
 import java.util.Enumeration;
-import javax.sound.sampled.Control.Type;
-import javax.sound.sampled.Line.Info;
-import javax.sound.sampled.*;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.Timer;
-import sun.audio.*;
+import sun.audio.AudioPlayer;
+import sun.audio.AudioStream;
 /**
  *
  * @author jonny
  */
+
+
 public class Cars {
 public static String[][] credentials=null;
 private static String[][] racersReady = null;
@@ -27,7 +24,7 @@ private static String[][] tmpcsv=null;
 private static String[] tmpStringArr=null;
 private static int[] positions = null;
 private static int[] ids = null;
-private static int[] laps = null;
+private static long[][] laps = null;
 private static racers racers = null;
 private static mainFrame mainFrame = null;
 private static String csv = new String();
@@ -42,6 +39,7 @@ private static Date date=null;
 private static long start_time=0;
 private static long stop_time=0;
 private static long tmpTime = 0;
+private static long endTime = 0;
 private static long[][] times=null;
 private static long now_time=0;
 private static String cPort = "COM3";
@@ -60,9 +58,11 @@ private static AudioStream asBreak=null;
     
     public static void putCredentials(String[] str) throws IOException{
         tmpcsv = new String[credentials.length+1][cols];
-        functions.cpyArrays(credentials[credentials.length-1], tmpcsv[tmpcsv.length-1]);
+        System.arraycopy(credentials[credentials.length-1],0, tmpcsv[tmpcsv.length-1],0,credentials[credentials.length-1].length);
         credentials=tmpcsv;
-        credentials[credentials.length-1] = str;
+        credentials[credentials.length-1][0] = str[0];
+        credentials[credentials.length-1][1] = str[1];
+        credentials[credentials.length-1][2] = str[2];
         writeCSV(str);
     }
     
@@ -75,7 +75,9 @@ private static AudioStream asBreak=null;
             while((line=bReader.readLine()) != null){
                 tmp+=line;
             }
+            bReader.close();
         }
+        
         catch (IOException e){
             e.printStackTrace();
             
@@ -134,14 +136,20 @@ private static AudioStream asBreak=null;
     }
     
     public static void writeCSV(String[] str) throws IOException{
-        FileWriter fstream = new FileWriter(csvFile);
+        
         try{
+            FileWriter fstream = new FileWriter(csvFile);
             BufferedWriter bWriter = new BufferedWriter(fstream);
-            for(int i=0;i<str.length;i++){
-                csv += str[i]+",";
+            
+            for(int i=0;i<credentials.length;i++){
+                for(int u=0;u<3;u++){
+                    csv += credentials[i][u]+",";
+                }
             }
-            System.out.println(csv);
+            
+            
             bWriter.write(csv);
+            bWriter.close();
         }
         catch(Exception e){
             e.printStackTrace();
@@ -219,7 +227,7 @@ private static AudioStream asBreak=null;
     }
     
     
-    public static void positionDet(int id){
+    public static void positionDet(long[][] laps){
         /*
         now_time=(new Date()).getTime();
         times[id]=stop_time;
@@ -240,20 +248,20 @@ private static AudioStream asBreak=null;
         
         
     }
+    
+    
     public static long getMax(long[] data){
-        long tmp=0;
-        int id=0;
+        long tmpik=0;
+        int idik=0;
         int i=0;
             for(i=0;i<data.length;i++){
-                if(tmp < data[i]){
-                    tmp=data[i];
-                    id=i;
+                if(tmpik < data[i]){
+                    tmpik=data[i];
+                    idik=i;
                 }
             }
             
-        return tmp;
+        return tmpik;
     }
-    public static void updateGraphics(){
-        
-    }
+
 }

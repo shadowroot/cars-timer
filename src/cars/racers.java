@@ -5,6 +5,8 @@
 package cars;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -111,16 +113,17 @@ private static int limit=3;
     }// </editor-fold>//GEN-END:initComponents
 
     private void SubmitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SubmitActionPerformed
-        credentials = new String[limit];
-        credentials[0] = jTextField1.getText();
-        credentials[1] = jTextField2.getText();
-        credentials[2] = jTextField3.getText();
-        try{
-        Cars.putCredentials(credentials);
+       
+            credentials = new String[limit];
+            credentials[0] = jTextField1.getText();
+            credentials[1] = jTextField2.getText();
+            credentials[2] = jTextField3.getText();
+        try {
+            Cars.putCredentials(credentials);
+        } catch (IOException ex) {
+            Logger.getLogger(racers.class.getName()).log(Level.SEVERE, null, ex);
         }
-        catch(IOException e){
-            e.printStackTrace();
-        }
+        
         this.setVisible(false);
     }//GEN-LAST:event_SubmitActionPerformed
 

@@ -10,8 +10,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Date;
-
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.Timer;
 
 /**
  *
@@ -274,12 +275,7 @@ private static long[] interuptionRow=null;
         }
         //Numbers
         if (key >= '1' && key <= '9') {
-            
-            
-            
-            
-            
-            
+
             if(change){
                 tmpTimes = new long[laps.length+1];
                 functions.cpyArrays(laps[key], tmpTimes);

@@ -3,6 +3,7 @@ byte sync = 0;
 int pin = 7;
 byte in;
 int it = 10;
+byte crossed = 0;
 
 void setup(){
  Serial.begin(9600);
@@ -11,8 +12,20 @@ void setup(){
 
 void loop(){
   in = digitalRead(pin);
+  if(in == HIGH){
+    crossed = 0xff;
+    while(Serial.available() <= 0){
+       Serial.print('C'); 
+    }
+  }
+  if(in == LOW && crossed == 0xff){
+    while(Serial.available() <= 0){
+      crossed = 0x00;
+      Serial.print('E');
+    }
+  }
   if(it == 0){
-    Serial.print("CI");
+    Serial.print("I");
     sync=0;
   }
   if(sync == 0){
@@ -28,7 +41,7 @@ void loop(){
   else{
     if(Serial.available() <= 0){ /*Pokud neni zadny vstup*/
       if(sync == 1){
-        Serial.print(in);
+        Serial.print('A');
       }
     }
   }
