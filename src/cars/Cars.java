@@ -9,8 +9,7 @@ import java.io.*;
 import java.util.Date;
 import java.util.Enumeration;
 import javax.swing.JCheckBoxMenuItem;
-import sun.audio.AudioPlayer;
-import sun.audio.AudioStream;
+import sun.audio.*;
 /**
  *
  * @author jonny
@@ -18,7 +17,7 @@ import sun.audio.AudioStream;
 
 
 public class Cars {
-public static String[][] credentials=null;
+public static String[][] credentials;
 private static String[][] racersReady = null;
 private static String[][] tmpcsv=null;
 private static String[] tmpStringArr=null;
@@ -28,7 +27,7 @@ private static long[][] laps = null;
 private static racers racers = null;
 private static mainFrame mainFrame = null;
 private static String csv = new String();
-private static String csvFile = "racers.csv";
+public static String csvFile = "racers.csv";
 private static serial serial = null;
 private static String tmp = null;
 private static int maxSize = 0x800;
@@ -48,6 +47,7 @@ private static long[][] results=null;//lap results +-
 private static int[] places = null;//racers places
 private static InputStream sound = null;
 private static AudioStream asBreak=null;
+private static int[] intLapLastIndex = null;
 
 
     public Cars() throws IOException{
@@ -77,6 +77,15 @@ private static AudioStream asBreak=null;
         writeCSV(credentials);
         mainFrame.addRacers(Cars.credentials);
     }
+    /*
+     * Last results
+     */
+    
+    public static void setLaps(long[][] str){
+        laps = null;
+        laps = str;
+    }
+    
     
     public static void readCSV(String str,String[][] table) throws IOException{
         
@@ -113,19 +122,23 @@ private static AudioStream asBreak=null;
     
     public static void putCredentialis(String[][] table){
         int i=0;
-        
+        int u=0;
         if(credentials != null){
             tmpcsv = new String[table.length+credentials.length][cols];
             for(i=0;i<credentials.length;i++){
                 System.arraycopy(credentials[i],0, tmpcsv[i],0,credentials[i].length);
+                
             }
+            for(u=0;u<table.length;u++){
+                System.arraycopy(table[u],0,tmpcsv[i+u],0,table[u].length);
+            }
+            
         }
         else{
-            tmpcsv = new String[table.length][cols];
+            tmpcsv = table;
         }
-        for(int u=0;u<table.length;u++){
-            tmpcsv[i+u]=table[u];
-        }
+        
+       
         credentials=tmpcsv;
         
     }
@@ -156,7 +169,9 @@ private static AudioStream asBreak=null;
             
             for(int i=0;i<str.length;i++){
                 for(int u=0;u<cols;u++){
-                    csv += str[i][u]+",";
+                    if(str[i][u] != null){
+                        csv += str[i][u]+",";
+                    }
                 }
             }
             
@@ -171,8 +186,6 @@ private static AudioStream asBreak=null;
         
     }
     public static void initRacers() throws IOException{
-        date = new Date();
-        System.out.println(date.toString());
         readCSV(csvFile,credentials);
         mainFrame.addRacers(credentials);
     }

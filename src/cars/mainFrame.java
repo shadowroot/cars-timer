@@ -4,7 +4,6 @@
  */
 package cars;
 
-import com.sun.xml.internal.ws.api.ha.StickyFeature;
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -29,6 +28,7 @@ public class mainFrame extends javax.swing.JFrame {
     private static Graphics offscreen=null;
     private static JCheckBox[] chRacers=null;
     private static JCheckBox[] boxes = null;
+    private static JFrame del=null;
     
     
     /**
@@ -206,8 +206,9 @@ public class mainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem6ActionPerformed
 
     public static void addRacers(String[][] cars){
-        
+        jPanel1.removeAll();
         chRacers = new JCheckBox[cars.length];
+        
         for(int i=0;i<cars.length;i++){
             
             
@@ -272,8 +273,12 @@ public class mainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jMenuItem7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem7ActionPerformed
-            JFrame del = new JFrame("Delete them");
-            del.setSize(300, 300);
+            del = new JFrame("Delete them");
+            JPanel pan = new JPanel();
+            del.setSize(800, 600);
+            pan.setSize(800, 600);
+            
+            del.add(pan);
             JButton smazat = new JButton("Smazat");
             
             if(Cars.credentials != null){
@@ -284,35 +289,55 @@ public class mainFrame extends javax.swing.JFrame {
                             boxes[i].setText(i+"  "+Cars.credentials[i][0]+"  "+Cars.credentials[i][1]+"  "+Cars.credentials[i][2]);
                             boxes[i].setSize(1000, 20);
                             boxes[i].setLocation(10, i*30);
-                            
+                            pan.add(boxes[i]);
                         }
             }
             smazat.setLocation(del.WIDTH-120, del.HEIGHT-20);
-            smazat.setSize(20, 100);
+            smazat.setSize(10, 20);
             smazat.addActionListener(new java.awt.event.ActionListener() {
             @Override
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
                     int u=0;
+                    int i=0;
                      String[][] tmpCred = new String[Cars.credentials.length][Cars.cols];
-                        for(int i=0;i<Cars.credentials.length;i++){
+                        for(i=0;i<Cars.credentials.length;i++){
                            
-                            if(!boxes[i].isSelected()){
+                            if(!boxes[i].isSelected() && Cars.credentials[i] != null){
                                 tmpCred[u] = Cars.credentials[i];
                                 u++;
                             }
                             
                         }
-                        Cars.credentials = tmpCred;
+                        int k=0;
+                        for(int l=0;l<tmpCred.length;l++){
+                            
+                            if(tmpCred[l][0] == null){
+                                k++;
+                            }
+                        }
+                        
+                        
+                        
+                        if(u==0){
+                                tmpCred = null;
+                        }
+                        
+                        
+                        Cars.credentials = new String[(tmpCred.length-k)][Cars.cols];
+                        System.arraycopy(tmpCred, 0, Cars.credentials, 0, tmpCred.length-k);
+                        
+
                 try {
                     Cars.writeCSV(Cars.credentials);
-                    mainFrame.addRacers(Cars.credentials);
                 } catch (IOException ex) {
                     Logger.getLogger(mainFrame.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                
+                addRacers(Cars.credentials);
+                del.setVisible(false);
                         
-                    }
-            });
-            del.add(smazat);
+            }});
+            pan.add(smazat);
             del.setVisible(true);
     }//GEN-LAST:event_jMenuItem7ActionPerformed
 
