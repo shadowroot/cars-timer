@@ -4,6 +4,8 @@
  */
 package cars;
 
+import com.sun.xml.internal.ws.api.ha.StickyFeature;
+import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,6 +28,7 @@ public class mainFrame extends javax.swing.JFrame {
     private static JPanel pan=null;
     private static Graphics offscreen=null;
     private static JCheckBox[] chRacers=null;
+    private static JCheckBox[] boxes = null;
     
     
     /**
@@ -39,6 +42,7 @@ public class mainFrame extends javax.swing.JFrame {
         /*
          * Create and display the form
          */
+
         this.setVisible(true);
     }
     
@@ -63,6 +67,7 @@ public class mainFrame extends javax.swing.JFrame {
         jMenu3 = new javax.swing.JMenu();
         jMenuItem5 = new javax.swing.JMenuItem();
         jMenuItem6 = new javax.swing.JMenuItem();
+        jMenuItem7 = new javax.swing.JMenuItem();
         jMenu4 = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -78,7 +83,7 @@ public class mainFrame extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 365, Short.MAX_VALUE)
+            .addGap(0, 372, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -129,6 +134,14 @@ public class mainFrame extends javax.swing.JFrame {
             }
         });
         jMenu3.add(jMenuItem6);
+
+        jMenuItem7.setText("Delete zavodniku");
+        jMenuItem7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem7ActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jMenuItem7);
 
         jMenuBar1.add(jMenu3);
 
@@ -200,19 +213,20 @@ public class mainFrame extends javax.swing.JFrame {
             
             chRacers[i] = new JCheckBox();
             chRacers[i].setVisible(true);
-            chRacers[i].setText(i+"  "+cars[i][0]+"  "+cars[i][1]);
+            chRacers[i].setText(i+"  "+cars[i][0]+"  "+cars[i][1]+"  "+cars[i][2]);
             chRacers[i].setName(""+i+"");
             chRacers[i].setSize(1000, 20);
             chRacers[i].setLocation(20, i*30);
             
             
             jPanel1.add(chRacers[i]);
-        
             
             
        
         }
       
+        
+        
       jPanel1.repaint();
      
         
@@ -257,6 +271,51 @@ public class mainFrame extends javax.swing.JFrame {
         Cars.determineRacers(selected);
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void jMenuItem7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem7ActionPerformed
+            JFrame del = new JFrame("Delete them");
+            del.setSize(300, 300);
+            JButton smazat = new JButton("Smazat");
+            
+            if(Cars.credentials != null){
+                        boxes = new JCheckBox[Cars.credentials.length];
+                        
+                        for(int i=0;i<Cars.credentials.length;i++){
+                            boxes[i] = new JCheckBox();
+                            boxes[i].setText(i+"  "+Cars.credentials[i][0]+"  "+Cars.credentials[i][1]+"  "+Cars.credentials[i][2]);
+                            boxes[i].setSize(1000, 20);
+                            boxes[i].setLocation(10, i*30);
+                            
+                        }
+            }
+            smazat.setLocation(del.WIDTH-120, del.HEIGHT-20);
+            smazat.setSize(20, 100);
+            smazat.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    int u=0;
+                     String[][] tmpCred = new String[Cars.credentials.length][Cars.cols];
+                        for(int i=0;i<Cars.credentials.length;i++){
+                           
+                            if(!boxes[i].isSelected()){
+                                tmpCred[u] = Cars.credentials[i];
+                                u++;
+                            }
+                            
+                        }
+                        Cars.credentials = tmpCred;
+                try {
+                    Cars.writeCSV(Cars.credentials);
+                    mainFrame.addRacers(Cars.credentials);
+                } catch (IOException ex) {
+                    Logger.getLogger(mainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                        
+                    }
+            });
+            del.add(smazat);
+            del.setVisible(true);
+    }//GEN-LAST:event_jMenuItem7ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -274,6 +333,7 @@ public class mainFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JMenuItem jMenuItem6;
+    private javax.swing.JMenuItem jMenuItem7;
     private static javax.swing.JPanel jPanel1;
     private static javax.swing.JLabel timeLabel;
     // End of variables declaration//GEN-END:variables

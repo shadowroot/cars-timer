@@ -33,7 +33,7 @@ private static serial serial = null;
 private static String tmp = null;
 private static int maxSize = 0x800;
 private static boolean debug = true;
-private static int cols=3;
+public static int cols=3;
 private static int id=0;
 private static Date date=null;
 private static long start_time=0;
@@ -57,20 +57,33 @@ private static AudioStream asBreak=null;
     
     
     public static void putCredentials(String[] str) throws IOException{
-        tmpcsv = new String[credentials.length+1][cols];
-        System.arraycopy(credentials[credentials.length-1],0, tmpcsv[tmpcsv.length-1],0,credentials[credentials.length-1].length);
+        int len=0;
+        if(credentials != null){
+            len = credentials.length;
+            tmpcsv = new String[len+1][cols];
+            for(int i=0;i<credentials.length;i++){
+                System.arraycopy(credentials[i],0 ,tmpcsv[i],0 ,credentials[i].length);
+            }
+            
+        }
+        else{
+            tmpcsv = new String[1][cols];
+        }
+        
         credentials=tmpcsv;
         credentials[credentials.length-1][0] = str[0];
         credentials[credentials.length-1][1] = str[1];
         credentials[credentials.length-1][2] = str[2];
-        writeCSV(str);
+        writeCSV(credentials);
+        mainFrame.addRacers(Cars.credentials);
     }
     
     public static void readCSV(String str,String[][] table) throws IOException{
         
         String line = new String();
-        FileReader fstream = new FileReader(str);
+        
         try {
+            FileReader fstream = new FileReader(str);
             BufferedReader bReader = new BufferedReader(fstream);
             while((line=bReader.readLine()) != null){
                 tmp+=line;
@@ -104,7 +117,7 @@ private static AudioStream asBreak=null;
         if(credentials != null){
             tmpcsv = new String[table.length+credentials.length][cols];
             for(i=0;i<credentials.length;i++){
-                functions.cpyArrays(credentials[i], tmpcsv[i]);
+                System.arraycopy(credentials[i],0, tmpcsv[i],0,credentials[i].length);
             }
         }
         else{
@@ -135,15 +148,15 @@ private static AudioStream asBreak=null;
        
     }
     
-    public static void writeCSV(String[] str) throws IOException{
+    public static void writeCSV(String[][] str) throws IOException{
         
         try{
             FileWriter fstream = new FileWriter(csvFile);
             BufferedWriter bWriter = new BufferedWriter(fstream);
             
-            for(int i=0;i<credentials.length;i++){
-                for(int u=0;u<3;u++){
-                    csv += credentials[i][u]+",";
+            for(int i=0;i<str.length;i++){
+                for(int u=0;u<cols;u++){
+                    csv += str[i][u]+",";
                 }
             }
             
@@ -228,6 +241,7 @@ private static AudioStream asBreak=null;
     
     
     public static void positionDet(long[][] laps){
+        
         /*
         now_time=(new Date()).getTime();
         times[id]=stop_time;
@@ -240,12 +254,8 @@ private static AudioStream asBreak=null;
                 positions[i] = i;
                 times[i] = stop_time;
             }
-        }
-        * 
+        } 
         */
-        
-        
-        
         
     }
     

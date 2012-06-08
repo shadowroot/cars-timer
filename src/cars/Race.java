@@ -237,12 +237,15 @@ private static long[] interuptionRow=null;
         
         long[] tmp = new long[tmpTimes.length+1];
         if(tmpTimes != null){
-            functions.cpyArrays(tmpTimes, tmp);
+            System.arraycopy(tmpTimes,0, tmp,0,tmpTimes.length);
         }
         
         tmpTimes[tmpTimes.length-1]=now.getTime();
         racerReady=true;
         jLabel1.setText("Zmáčkněte číslo závodníka ....");
+        
+    }
+    public static void main_loop(){
         
     }
     
@@ -271,7 +274,7 @@ private static long[] interuptionRow=null;
     public void keyReleased(KeyEvent e) {
         char key = e.getKeyChar();
         if (key == '`' || key == '~' || key == ';') {
-            
+            change=true;
         }
         //Numbers
         if (key >= '1' && key <= '9') {
@@ -298,6 +301,7 @@ private static long[] interuptionRow=null;
                 }
             }
             racerReady=false;
+            change=false;
             jLabel1.setText("");
             
         }
