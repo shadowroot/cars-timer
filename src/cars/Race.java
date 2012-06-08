@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Date;
+import java.util.Stack;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -22,8 +23,8 @@ public class Race extends javax.swing.JFrame implements KeyListener {
 private static JPanel jPanel1=null;
 private static String[][] credentials=null;
 private static long[][] laps=null;
-private static int lastLap = 0;
-private static long[] tmpTimes=null;
+private static int[] lastLaps = null;
+private static Stack tmpTimes=new Stack();
 private static char[] KeyPressed = new char[20];
 private static int[] tmpIndexes=null;
 private static boolean change=false;
@@ -31,7 +32,9 @@ private static long start=0;
 private static JLabel[] racers = null;
 private static boolean racerReady = false;
 private static long[] interuptionRow=null;
-
+private static long[] tmpLaps = null;
+private static long[][] lTimes = null;
+private static JLabel[] labelLaps=null;
 
     /**
      * Creates new form Race
@@ -92,11 +95,11 @@ private static long[] interuptionRow=null;
         racersPanel.setLayout(racersPanelLayout);
         racersPanelLayout.setHorizontalGroup(
             racersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 233, Short.MAX_VALUE)
+            .addGap(0, 595, Short.MAX_VALUE)
         );
         racersPanelLayout.setVerticalGroup(
             racersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 267, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
 
         jLabel1.setText("jLabel1");
@@ -116,17 +119,21 @@ private static long[] interuptionRow=null;
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(timeLabel)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel1)
-                            .addComponent(jButton1))
-                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(timeLabel)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(19, 19, 19)
+                                .addComponent(jLabel1)))
+                        .addGap(28, 28, 28)
+                        .addComponent(racersPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButton1)
+                        .addGap(32, 32, 32)
                         .addComponent(jButton2)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton3)))
-                .addGap(28, 28, 28)
-                .addComponent(racersPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(35, 35, 35)
+                        .addComponent(jButton3)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -134,17 +141,19 @@ private static long[] interuptionRow=null;
             .addGroup(layout.createSequentialGroup()
                 .addGap(34, 34, 34)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(racersPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(timeLabel)
                         .addGap(39, 39, 39)
                         .addComponent(jLabel1)
-                        .addGap(175, 175, 175)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 341, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jButton1)
                             .addComponent(jButton2)
-                            .addComponent(jButton3))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jButton3))
+                        .addGap(29, 29, 29))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(racersPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(63, 63, 63))))
         );
 
         pack();
@@ -155,8 +164,7 @@ private static long[] interuptionRow=null;
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        Date d = new Date();
-        start = d.getTime();
+        start = (new Date()).getTime();
         start_race();
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -165,8 +173,8 @@ private static long[] interuptionRow=null;
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private static void start_race(){
-        paint_time();
         
+        paint_time();
     }
     
     private static void refresh_panel(){
@@ -235,12 +243,8 @@ private static long[] interuptionRow=null;
     public static void serial(){
         Date now = new Date();
         
-        long[] tmp = new long[tmpTimes.length+1];
-        if(tmpTimes != null){
-            System.arraycopy(tmpTimes,0, tmp,0,tmpTimes.length);
-        }
         
-        tmpTimes[tmpTimes.length-1]=now.getTime();
+        tmpTimes.push(now.getTime());
         racerReady=true;
         jLabel1.setText("Zmáčkněte číslo závodníka ....");
         
@@ -272,30 +276,32 @@ private static long[] interuptionRow=null;
 
     @Override
     public void keyReleased(KeyEvent e) {
+        
         char key = e.getKeyChar();
         if (key == '`' || key == '~' || key == ';') {
             change=true;
+            jLabel1.setText("Zmáčkněte číslo závodníka ....");
         }
         //Numbers
-        if (key >= '1' && key <= '9') {
-
+        if ((key >= '1' && key <= '9')) {
+            int u = Character.getNumericValue(key);
             if(change){
-                tmpTimes = new long[laps.length+1];
-                functions.cpyArrays(laps[key], tmpTimes);
-                laps[key][laps[key].length-1] = laps[lastLap][laps[lastLap].length-1];
+                laps[u][laps[u].length-1] = Long.parseLong(tmpTimes.pop().toString());
             }
             else{
                 if(racerReady){
-                    if(tmpTimes != null && tmpTimes.length>0){
-                        int u = (int)key;
-                        for(int i=0;i<tmpTimes.length;i++){
-                            long[] tmp = new long[laps[i].length+1];
-                            if(laps[u] != null){
-                                System.arraycopy(laps[i], 0, tmp, 0, laps[i].length);
-                            }
-                            tmp[tmp.length-1] = tmpTimes[tmpTimes.length-1];
-
-                            laps[u]=tmp;
+                    if(tmpTimes != null && tmpTimes.size()>0){
+                            
+                        if(laps[u][lastLaps[u]] >= 0){
+                            laps[u][lastLaps[u]] = Long.parseLong(tmpTimes.pop().toString());
+                            lastLaps[u]++;
+                        }
+                        else{
+                            tmpLaps = new long[laps[u].length*2];
+                            System.arraycopy(laps[u], 0,tmpLaps, 0, laps[u].length);
+                            laps[u] = tmpLaps;
+                            laps[u][lastLaps[u]] = Long.parseLong(tmpTimes.pop().toString());
+                            lastLaps[u]++;
                         }
                     }
                 }
@@ -308,4 +314,65 @@ private static long[] interuptionRow=null;
        
         
     }
+    private static int max(int[] arr){
+        int max=0;
+        for(int i=0;i<arr.length;i++){
+            if(arr[i] > max){
+                max=arr[i];
+            }
+        }
+        return max;
+    }
+    /*
+     * Function for showing laps and interval
+     * 
+     */
+    public static void updateLaps(){
+        
+        
+        String text = new String();
+        labelLaps = new JLabel[laps.length];
+        lTimes = new long[laps.length][laps[max(lastLaps)].length];
+        for(int i=0;i<laps.length;i++){
+            
+            labelLaps[i] = new JLabel();
+            
+            for(int u=0;u<laps[i].length;u++){
+                if(u!=0)
+                {
+                    lTimes[i][u] = laps[i][u]-lTimes[i][u-1]-start;
+                }
+                else{
+                    lTimes[i][u] = laps[i][u]-start;
+                }
+            }
+            double lastTime = lTimes[i][lTimes[i].length-1]-lTimes[i][lTimes[i].length-1];
+            text += ""+lastTime+"   ";        
+            for(int u=0;u<lTimes[i].length;u++){
+                text += determineTime(lTimes[i][u])+" ";
+            }
+            
+            labelLaps[i].setText(text);
+            labelLaps[i].setSize(1000, 20);
+            labelLaps[i].setLocation(200, i*30);
+            racersPanel.add(labelLaps[i]);
+        
+        racersPanel.repaint();
+        }
+    }
+    
+    private static String determineTime(long stamp){
+        String time = new String();
+        long milis = stamp%1000;
+        long sec = (stamp/1000)%60;
+        long min = ((stamp/1000)/60)%60;
+        long hour = (((stamp/1000)/60)/60)%24;
+        if(hour > 0){time += ""+hour+":";}
+        if(min > 0){time += ""+min+":";}
+        if(sec > 0){time += ""+sec+".";}
+        if(milis > 0){time += ""+milis+"";}
+        return time;
+    }
+    
+    
 }
