@@ -346,12 +346,18 @@ private static JLabel[] labelLaps=null;
                     lTimes[i][u] = laps[i][u]-start;
                 }
             }
+            /*
+             * Posledni mezicas
+             */
             double lastTime = lTimes[i][lTimes[i].length-1]-lTimes[i][lTimes[i].length-1];
-            text += ""+lastTime+"   ";        
+            text += ""+lastTime+"   ";     /*
+             * Vsechny casy do jednoho textu String text
+             * 
+             */
             for(int u=0;u<lTimes[i].length;u++){
                 text += determineTime(lTimes[i][u])+" ";
             }
-            
+            labelLaps[i].removeAll();
             labelLaps[i].setText(text);
             labelLaps[i].setSize(1000, 20);
             labelLaps[i].setLocation(200, i*30);
@@ -360,7 +366,10 @@ private static JLabel[] labelLaps=null;
         racersPanel.repaint();
         }
     }
-    
+    /*
+     * Takes a timestamp
+     * Returns String
+     */
     private static String determineTime(long stamp){
         String time = new String();
         long milis = stamp%1000;
