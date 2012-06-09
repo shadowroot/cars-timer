@@ -63,6 +63,7 @@ public class serial
             boolean ok =true;
             byte[] buffer = new byte[1];
             int len = -1;
+            boolean thru = false;
             try
             {
                 while ( ( len = this.in.read(buffer)) > -1 && ok )
@@ -70,18 +71,20 @@ public class serial
                     if(buffer[0] == 'I'){
                         ok=false;
                     }
-                    if(buffer[0] != 'A' || buffer[0] != 'C'){
-                        return;
+                    if(buffer[0] == 'A' ){
+                        ok=true;
                     }
-                    if(buffer[0] == 'C'){
+                    if(buffer[0] == 'C' && thru==false){
                         try {    
                             Cars.breakLine();
+                            thru = true;
                         } catch (InterruptedException ex) {
                             Logger.getLogger(serial.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                     if(buffer[0] == 'E'){
-                        
+                        ok = true;
+                        thru = false;
                     }
                     try {
                         Thread.sleep(10);

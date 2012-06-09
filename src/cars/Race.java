@@ -187,7 +187,7 @@ private static JLabel[] labelLaps=null;
         for(int i=0;i<credentials.length;i++){
             racers[i] = new JLabel();
             racers[i].setText(i+" "+credentials[i][0]+"  "+credentials[i][1] + "  " + laps[i][laps[i].length-1]);
-            racers[i].setSize(1000, 20);
+            racers[i].setSize(200, 20);
             racers[i].setLocation(20, i*30);
             racersPanel.add(racers[i]);
         }

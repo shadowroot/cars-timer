@@ -222,6 +222,8 @@ private static int[] intLapLastIndex = null;
                         com_ports[i].setSelected(false);
                     }
                 }
+                serial s = new serial();
+                s.main(cPort);
             }
         });
         mainFrame.getComMenu().add(com_ports[i]);
