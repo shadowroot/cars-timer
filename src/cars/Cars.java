@@ -202,11 +202,14 @@ private static int[] intLapLastIndex = null;
         
         int i=0;
          
-         com_ports = new JCheckBoxMenuItem[3];
+         com_ports = new JCheckBoxMenuItem[1];
        
         while(e.hasMoreElements()){
+            JCheckBoxMenuItem[] tmpChk = new JCheckBoxMenuItem[com_ports.length+1];
           CommPortIdentifier cpi = (CommPortIdentifier)e.nextElement(); 
           String name=cpi.getName();
+          System.arraycopy(com_ports, 0, tmpChk, 0, com_ports.length);
+          com_ports = tmpChk;
         com_ports[i] = new JCheckBoxMenuItem();
         com_ports[i].setSelected(false);
         com_ports[i].setText(name);
@@ -218,8 +221,10 @@ private static int[] intLapLastIndex = null;
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cPort = evt.getActionCommand();
                 for(int i=0;i<com_ports.length;i++){
-                    if(com_ports[i] != evt.getSource()){
-                        com_ports[i].setSelected(false);
+                    if(com_ports[i] != null){
+                        if(com_ports[i] != evt.getSource()){
+                            com_ports[i].setSelected(false);
+                        }
                     }
                 }
                 serial s = new serial();

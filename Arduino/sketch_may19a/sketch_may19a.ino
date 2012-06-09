@@ -28,24 +28,18 @@ void loop(){
     Serial.print("I");
     sync=0;
   }
-  if(sync == 0){
-    if(Serial.available() > 0){
-      c = Serial.read();
-      if(c == 'B'){
-        sync = 1;
-        it = 10;
-      }
-    }
-    
-  }
-  else{
-    if(Serial.available() <= 0){ /*Pokud neni zadny vstup*/
-      if(sync == 1){
-        Serial.print('A');
-      }
+
+  if(Serial.available() > 0){
+    c = Serial.read();
+    if(c == 'B'){
+      sync = 1;
+      it = 10;
     }
   }
-  
+
+  /*Vzdycky posli sync*/
+      
+  Serial.print('A');
   delay(100);
   it--;
 }

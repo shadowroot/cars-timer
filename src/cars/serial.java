@@ -69,13 +69,15 @@ public class serial
                 while ( ( len = this.in.read(buffer)) > -1 && ok )
                 {
                     if(buffer[0] == 'I'){
-                        ok=false;
+                        System.out.println("[+] Sync inactive");
                     }
                     if(buffer[0] == 'A' ){
+                        System.out.println("[+] Sync active");
                         ok=true;
                     }
                     if(buffer[0] == 'C' && thru==false){
                         try {    
+                            System.out.println("[+] Sync Linebreak");
                             Cars.breakLine();
                             thru = true;
                         } catch (InterruptedException ex) {
