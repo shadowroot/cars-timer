@@ -78,14 +78,10 @@ public class CRacer implements Serializable{
         String ret = new String();
         ret += firstname + ",";
         ret += surname + ",";
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream obj_out = new ObjectOutputStream(baos);
         for(EClass c : classes){
-            obj_out.writeObject(c);
-            obj_out.write(':');
+            
             
         }
-        ret += baos.toString();
         return ret;
     }
     

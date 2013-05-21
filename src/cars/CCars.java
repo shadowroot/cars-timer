@@ -7,8 +7,6 @@ package cars;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.Queue;
 
 /**
  *
@@ -45,9 +43,8 @@ public int keys = 0;
         surname = params[1];
         CRacer r = new CRacer(last_id, firstname, surname);
         String[] categories = params[2].split(":");
-        for(String cat : categories){
-            Object cl = cat;
-            r.classes.add((EClass)cl);
+        for(Object cat : categories){
+            r.classes.add((EClass) cat);
         }
         racers.add(r);
     }
@@ -118,6 +115,10 @@ public int keys = 0;
     
     public  void newRaces(){
         WRacers Wracers = new WRacers(this);
+    }
+
+    private void EClass(String cat) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
    
