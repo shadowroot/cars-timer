@@ -4,13 +4,14 @@
  */
 package cars;
 
-import java.awt.BorderLayout;
-import java.awt.Graphics;
+import gnu.io.CommPortIdentifier;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -20,34 +21,95 @@ import javax.swing.*;
  *
  * @author jonny
  */
-public class mainFrame extends javax.swing.JFrame {
+public class WMainFrame extends javax.swing.JFrame {
 
-    private static int[] readyRacers=null;
-    private static GroupLayout layout=null;
-    private static JPanel pan=null;
-    private static Graphics offscreen=null;
-    private static JCheckBox[] chRacers=null;
-    private static JCheckBox[] boxes = null;
-    private static JFrame del=null;
+    private CCars cars;
+    private CSerial s;
+    private static  boolean connected;
+    private JCheckBoxMenuItem[] com_ports;
+    private JCheckBox[] chRacers;
+    private WRace wRace;
     
     
     /**
      * Creates new form mainFrame
      */
-    public mainFrame() {
+    public WMainFrame(CCars cars) {
         initComponents();
         paint_time();
+        this.cars = cars;
+        connected = false;
         //</editor-fold>
 
-        /*
+        /**
          * Create and display the form
          */
-
+        addComm();
         this.setVisible(true);
     }
     
     public javax.swing.JMenu getComMenu(){
         return jMenu4;
+    }
+    /**
+     * 
+     */
+    public void init(){
+        jComboBox1.addItem(EClass.F103);
+        jComboBox1.addItem(EClass.C4X4);
+        jComboBox1.addItem(EClass.Open);
+        
+    }
+    
+    private void addComm(){
+        Enumeration e = CommPortIdentifier.getPortIdentifiers();
+        
+        int i=0;
+         
+         com_ports = new JCheckBoxMenuItem[1];
+       
+        while(e.hasMoreElements()){
+            JCheckBoxMenuItem[] tmpChk = new JCheckBoxMenuItem[com_ports.length+1];
+          CommPortIdentifier cpi = (CommPortIdentifier)e.nextElement(); 
+          String name=cpi.getName();
+          System.arraycopy(com_ports, 0, tmpChk, 0, com_ports.length);
+          com_ports = tmpChk;
+        com_ports[i] = new JCheckBoxMenuItem();
+        com_ports[i].setSelected(false);
+        com_ports[i].setText(name);
+        com_ports[i].setActionCommand(name);
+        
+        
+        com_ports[i].addActionListener(new java.awt.event.ActionListener() {
+                private String cPort;
+                @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cPort = evt.getActionCommand();
+                for(int i=0;i<com_ports.length;i++){
+                    if(com_ports[i] != null){
+                        if(com_ports[i] != evt.getSource()){
+                            com_ports[i].setSelected(false);
+                        }
+                    }
+                }
+                s = new CSerial(cars);
+                try {
+                    s.connect(cPort);
+                } catch (Exception ex) {
+                    Logger.getLogger(RunCars.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        
+        i++;
+        
+        
+        }
+        
+        for(int u=0; u < i; u++){
+            jMenu4.add(com_ports[u]);
+        }
+        
     }
 
 
@@ -57,6 +119,7 @@ public class mainFrame extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         timeLabel = new javax.swing.JLabel();
+        jComboBox1 = new javax.swing.JComboBox();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -159,10 +222,12 @@ public class mainFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton1)
-                        .addContainerGap(512, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(timeLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 143, Short.MAX_VALUE)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(24, 24, 24))))
         );
@@ -175,7 +240,9 @@ public class mainFrame extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(timeLabel)
                         .addGap(323, 323, 323)
-                        .addComponent(jButton1)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton1)
+                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(20, Short.MAX_VALUE))
         );
 
@@ -187,7 +254,7 @@ public class mainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
-        new racers();
+        new WRacers(cars);
     }//GEN-LAST:event_jMenuItem5ActionPerformed
 
     private void jMenuItem6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem6ActionPerformed
@@ -195,150 +262,66 @@ public class mainFrame extends javax.swing.JFrame {
         int ret= ch.showDialog(null, "Otevrit soubor");
         if(ret == JFileChooser.APPROVE_OPTION){
             File file = ch.getSelectedFile();
-            try {
-                Cars.readCSV(file.getAbsolutePath(),Cars.credentials);
-                mainFrame.addRacers(Cars.credentials);
-            } catch (IOException ex) {
-                Logger.getLogger(mainFrame.class.getName()).log(Level.SEVERE, null, ex);
-            }
             
         }
     }//GEN-LAST:event_jMenuItem6ActionPerformed
-
-    public static void addRacers(String[][] cars){
+    /**
+     * Adding to main pannel
+     */
+    public void addRacers(){
         jPanel1.removeAll();
-        chRacers = new JCheckBox[cars.length];
+        chRacers = new JCheckBox[cars.racers.size()];
         
-        for(int i=0;i<cars.length;i++){
+        for(int i=0;i<cars.racers.size();i++){
             
             
             chRacers[i] = new JCheckBox();
             chRacers[i].setVisible(true);
-            chRacers[i].setText(i+"  "+cars[i][0]+"  "+cars[i][1]+"  "+cars[i][2]);
+            chRacers[i].setText(cars.racers.get(i).id + " "+cars.racers.get(i).Name());
             chRacers[i].setName(""+i+"");
             chRacers[i].setSize(1000, 20);
             chRacers[i].setLocation(20, i*30);
             
             
             jPanel1.add(chRacers[i]);
-            
-            
-       
         }
       
         
         
       jPanel1.repaint();
-     
-        
-
-        
     }
-    public static void paint_time(){
+    public  void paint_time(){
         Timer t = new Timer(100, new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 Date d = new Date();
                 timeLabel.setText(d.toString());
-                mainFrame.getFrames()[0].repaint();
+                WMainFrame.getFrames()[0].repaint();
             }
         });
         t.start();
    }
     
     
-    public static void addingRacers(java.awt.event.ActionEvent e){
-        int[]tint = new int[readyRacers.length+1];
-        tint = readyRacers;
-        readyRacers=tint;
-        readyRacers[readyRacers.length-1]=Integer.parseInt(e.getActionCommand().split("_")[1]);
-    }
+   public void openRaceWindow(LinkedList<CRacer> racers_list, EClass category){
+       wRace = new WRace(cars,category,racers_list);
+   }
     
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        int[] selected=null;
-        
+        LinkedList<CRacer> list = new LinkedList<CRacer>();
+        EClass model_class = (EClass) jComboBox1.getSelectedItem();
         for(int i=0;i<chRacers.length;i++){
-            if(chRacers[i].isSelected()){
-                
-                int[] tmp = new int[i+1];
-                if(selected != null){
-                    functions.cpyArrays(selected, tmp);
-                }
-                tmp[i]=i;
-                selected=tmp;
+            if(chRacers[i].isSelected() && cars.racers.get(i).classes.contains(model_class)){
+                list.add(cars.racers.get(i));
             }
         }
-        Cars.determineRacers(selected);
+        openRaceWindow(list,model_class);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jMenuItem7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem7ActionPerformed
-            del = new JFrame("Delete them");
-            JPanel pan = new JPanel();
-            del.setSize(800, 600);
-            pan.setSize(800, 600);
-            
-            del.add(pan);
-            JButton smazat = new JButton("Smazat");
-            
-            if(Cars.credentials != null){
-                        boxes = new JCheckBox[Cars.credentials.length];
-                        
-                        for(int i=0;i<Cars.credentials.length;i++){
-                            boxes[i] = new JCheckBox();
-                            boxes[i].setText(i+"  "+Cars.credentials[i][0]+"  "+Cars.credentials[i][1]+"  "+Cars.credentials[i][2]);
-                            boxes[i].setSize(1000, 20);
-                            boxes[i].setLocation(10, i*30);
-                            pan.add(boxes[i]);
-                        }
-            }
-            smazat.setLocation(del.WIDTH-120, del.HEIGHT-20);
-            smazat.setSize(10, 20);
-            smazat.addActionListener(new java.awt.event.ActionListener() {
-            @Override
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    int u=0;
-                    int i=0;
-                     String[][] tmpCred = new String[Cars.credentials.length][Cars.cols];
-                        for(i=0;i<Cars.credentials.length;i++){
-                           
-                            if(!boxes[i].isSelected() && Cars.credentials[i] != null){
-                                tmpCred[u] = Cars.credentials[i];
-                                u++;
-                            }
-                            
-                        }
-                        int k=0;
-                        for(int l=0;l<tmpCred.length;l++){
-                            
-                            if(tmpCred[l][0] == null){
-                                k++;
-                            }
-                        }
-                        
-                        
-                        
-                        if(u==0){
-                                tmpCred = null;
-                        }
-                        
-                        
-                        Cars.credentials = new String[(tmpCred.length-k)][Cars.cols];
-                        System.arraycopy(tmpCred, 0, Cars.credentials, 0, tmpCred.length-k);
-                        
-
-                try {
-                    Cars.writeCSV(Cars.credentials);
-                } catch (IOException ex) {
-                    Logger.getLogger(mainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                
-                addRacers(Cars.credentials);
-                del.setVisible(false);
-                        
-            }});
-            pan.add(smazat);
-            del.setVisible(true);
+          JFrame frame = new JFrame();
+          
     }//GEN-LAST:event_jMenuItem7ActionPerformed
 
     /**
@@ -347,6 +330,7 @@ public class mainFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JComboBox jComboBox1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;

@@ -10,37 +10,33 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Date;
-import java.util.Stack;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import java.util.LinkedList;
 import javax.swing.Timer;
 
 /**
  *
  * @author jonny
  */
-public class Race extends javax.swing.JFrame implements KeyListener {
-private static JPanel jPanel1=null;
-private static String[][] credentials=null;
-private static long[][] laps=null;
-private static int[] lastLaps = null;
-private static Stack tmpTimes=new Stack();
-private static char[] KeyPressed = new char[20];
-private static int[] tmpIndexes=null;
-private static boolean change=false;
-private static long start=0;
-private static JLabel[] racers = null;
-private static boolean racerReady = false;
-private static long[] interuptionRow=null;
-private static long[] tmpLaps = null;
-private static long[][] lTimes = null;
-private static JLabel[] labelLaps=null;
+public class WRace extends javax.swing.JFrame implements KeyListener {
 
+    private long start = 0;
+    private CCars cars;
+    private CRace race;
+    private EClass category;
+    private LinkedList<CRacer> racers;
+    private int key = 0;
+    private boolean modify = false;
+    
+    
     /**
      * Creates new form Race
      */
-    public Race() {
+    public WRace(CCars cars,EClass category, LinkedList<CRacer> racers) {
         initComponents();
+        this.cars = cars;
+        this.category = category;
+        this.racers = racers;
+        
         this.setVisible(true);
         jLabel1.setText("");
         setDefaultCloseOperation(HIDE_ON_CLOSE);
@@ -169,32 +165,24 @@ private static JLabel[] labelLaps=null;
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        change=true;
+        modify = true;
+        while(key == 0){}
+        race.modify(racers.get(key), cars.lastLap);
+        key = 0;
+        modify = false;
     }//GEN-LAST:event_jButton3ActionPerformed
 
-    private static void start_race(){
-        
+    private  void start_race(){
+        start = (new Date()).getTime();
+        race = new CRace(category, racers);
         paint_time();
     }
-    
-    private static void refresh_panel(){
+   
+    public void resolveRace(){
         
     }
     
-    private static void plug_racers(){
-        racers = new JLabel[credentials.length];
-        laps = new long[credentials.length][1];
-        for(int i=0;i<credentials.length;i++){
-            racers[i] = new JLabel();
-            racers[i].setText(i+" "+credentials[i][0]+"  "+credentials[i][1] + "  " + laps[i][laps[i].length-1]);
-            racers[i].setSize(200, 20);
-            racers[i].setLocation(20, i*30);
-            racersPanel.add(racers[i]);
-        }
-        racersPanel.repaint();
-    }
-    
-    private static void paint_time(){
+    private  void paint_time(){
         Timer t = new Timer(10, new ActionListener() {
 
             @Override
@@ -218,14 +206,7 @@ private static JLabel[] labelLaps=null;
         t.start();
     }
     
-    public static void updatePanels(String[][] str, long[] times) {
-        
-    }
     
-    public static void putCredentials(String[][] arStr){
-        credentials=arStr;
-        plug_racers();
-    }
     /**
      * @param args the command line arguments
      */
@@ -240,29 +221,15 @@ private static JLabel[] labelLaps=null;
     private static javax.swing.JPanel racersPanel;
     private static javax.swing.JLabel timeLabel;
     // End of variables declaration//GEN-END:variables
-    public static void serial(){
-        Date now = new Date();
-        
-        
-        tmpTimes.push(now.getTime());
-        racerReady=true;
+    public  void serial(){
         jLabel1.setText("Zmáčkněte číslo závodníka ....");
         
     }
-    public static void main_loop(){
-        
-    }
-    
-    public static  void lap_times(){
-        plug_racers();
-    }
+   
     
     
     @Override
     public void keyPressed(KeyEvent e) {
-        char key = e.getKeyChar();
-        
-
     }
     /*
      * @Override public void keyReleased(KeyEvent e) { throw new
@@ -279,98 +246,25 @@ private static JLabel[] labelLaps=null;
         
         char key = e.getKeyChar();
         if (key == '`' || key == '~' || key == ';') {
-            change=true;
             jLabel1.setText("Zmáčkněte číslo závodníka ....");
         }
         //Numbers
         if ((key >= '1' && key <= '9')) {
-            int u = Character.getNumericValue(key);
-            if(change){
-                laps[u][laps[u].length-1] = Long.parseLong(tmpTimes.pop().toString());
+            int u = key - '0';
+            if(modify){
+                this.key = u;
             }
             else{
-                if(racerReady){
-                    if(tmpTimes != null && tmpTimes.size()>0){
-                            
-                        if(laps[u][lastLaps[u]] >= 0){
-                            laps[u][lastLaps[u]] = Long.parseLong(tmpTimes.pop().toString());
-                            lastLaps[u]++;
-                        }
-                        else{
-                            tmpLaps = new long[laps[u].length*2];
-                            System.arraycopy(laps[u], 0,tmpLaps, 0, laps[u].length);
-                            laps[u] = tmpLaps;
-                            laps[u][lastLaps[u]] = Long.parseLong(tmpTimes.pop().toString());
-                            lastLaps[u]++;
-                        }
-                    }
-                }
-            }
-            racerReady=false;
-            change=false;
-            jLabel1.setText("");
-            
-        }
-       
-        
-    }
-    private static int max(int[] arr){
-        int max=0;
-        for(int i=0;i<arr.length;i++){
-            if(arr[i] > max){
-                max=arr[i];
+                cars.keys = u;
             }
         }
-        return max;
-    }
-    /*
-     * Function for showing laps and interval
-     * 
-     */
-    public static void updateLaps(){
         
-        
-        String text = new String();
-        labelLaps = new JLabel[laps.length];
-        lTimes = new long[laps.length][laps[max(lastLaps)].length];
-        for(int i=0;i<laps.length;i++){
-            
-            labelLaps[i] = new JLabel();
-            
-            for(int u=0;u<laps[i].length;u++){
-                if(u!=0)
-                {
-                    lTimes[i][u] = laps[i][u]-lTimes[i][u-1]-start;
-                }
-                else{
-                    lTimes[i][u] = laps[i][u]-start;
-                }
-            }
-            /*
-             * Posledni mezicas
-             */
-            double lastTime = lTimes[i][lTimes[i].length-1]-lTimes[i][lTimes[i].length-1];
-            text += ""+lastTime+"   ";     /*
-             * Vsechny casy do jednoho textu String text
-             * 
-             */
-            for(int u=0;u<lTimes[i].length;u++){
-                text += determineTime(lTimes[i][u])+" ";
-            }
-            labelLaps[i].removeAll();
-            labelLaps[i].setText(text);
-            labelLaps[i].setSize(1000, 20);
-            labelLaps[i].setLocation(200, i*30);
-            racersPanel.add(labelLaps[i]);
-        
-        racersPanel.repaint();
-        }
     }
     /*
      * Takes a timestamp
      * Returns String
      */
-    private static String determineTime(long stamp){
+    private  String determineTime(long stamp){
         String time = new String();
         long milis = stamp%1000;
         long sec = (stamp/1000)%60;

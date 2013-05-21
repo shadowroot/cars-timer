@@ -6,17 +6,20 @@ import gnu.io.SerialPort;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
 
-public class serial
+public class CSerial
 {
-    public serial()
+    private CCars cars;
+    public CSerial(CCars cars)
     {
-        super();
+         this.cars = cars;
     }
+
     
     void connect ( String portName ) throws Exception
     {
@@ -49,7 +52,7 @@ public class serial
     }
     
     /** */
-    public static class SerialReader implements Runnable 
+    public class SerialReader implements Runnable 
     {
         InputStream in;
         
@@ -63,35 +66,26 @@ public class serial
             boolean ok =true;
             byte[] buffer = new byte[1];
             int len = -1;
-            boolean thru = false;
             try
             {
                 while ( ( len = this.in.read(buffer)) > -1 && ok )
                 {
-                    if(buffer[0] == 'I'){
-                        System.out.println("[+] Sync inactive");
+                    if(buffer[0] == 'B'){
+                        Logger.getLogger(CSerial.class.getName()).log(Level.INFO, null, "[+] Sync serial");
                     }
-                    if(buffer[0] == 'A' ){
-                        System.out.println("[+] Sync active");
+                    else if(buffer[0] == 'A' ){
+                        cars.nextLap();
+                        Logger.getLogger(CSerial.class.getName()).log(Level.INFO, null, "[+] Line break");
                         ok=true;
                     }
-                    if(buffer[0] == 'C' && thru==false){
-                        try {    
-                            System.out.println("[+] Sync Linebreak");
-                            Cars.breakLine();
-                            thru = true;
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(serial.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                    if(buffer[0] == 'E'){
-                        ok = true;
-                        thru = false;
+                    else{
+                        ok = false;
+                        System.err.println("Problem");
                     }
                     try {
-                        Thread.sleep(10);
+                        Thread.sleep(100);
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(serial.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(CSerial.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     
                 }
@@ -104,7 +98,7 @@ public class serial
     }
 
     /** */
-    public static class SerialWriter implements Runnable 
+    public class SerialWriter implements Runnable 
     {
         OutputStream out;
         
@@ -115,37 +109,9 @@ public class serial
         
         public void run ()
         {
-            try
-            {   
-                boolean ok = true;
-                byte c = 'B';
-                while(ok){
-                        this.out.write(c);
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(serial.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-                                
-            }
-            catch ( IOException e )
-            {
-                 e.printStackTrace();
-            }            
+            
         }
     }
     
-    public static void main ( String arg )
-    {
-        try
-        {
-            (new serial()).connect(arg);
-        }
-        catch ( Exception e )
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
+    
 }

@@ -1,47 +1,21 @@
-byte c;
-byte sync = 0;
-int pin = 7;
-byte in;
-int it = 10;
-byte crossed = 0;
+int pinIn = 7;
+int in = 0;
 
 void setup(){
  Serial.begin(9600);
- pinMode(pin,INPUT); 
+ 
+ pinMode(pinIn,INPUT); 
 }
 
 void loop(){
-  in = digitalRead(pin);
-  if(in == HIGH){
-    crossed = 0xff;
-    while(Serial.available() <= 0){
-       Serial.print('C'); 
-    }
+  in = digitalRead(pinIn);
+  if(in){
+    Serial.println("A");
   }
-  if(in == LOW && crossed == 0xff){
-    while(Serial.available() <= 0){
-      crossed = 0x00;
-      Serial.print('E');
-    }
+  else{
+    Serial.println("B");
   }
-  if(it == 0){
-    Serial.print("I");
-    sync=0;
-  }
-
-  if(Serial.available() > 0){
-    c = Serial.read();
-    if(c == 'B'){
-      sync = 1;
-      it = 10;
-    }
-  }
-
-  /*Vzdycky posli sync*/
-      
-  Serial.print('A');
-  delay(100);
-  it--;
+  delay(50);
 }
 
 
