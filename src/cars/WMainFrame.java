@@ -7,8 +7,9 @@ package cars;
 import gnu.io.CommPortIdentifier;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -24,7 +25,6 @@ import javax.swing.*;
 public class WMainFrame extends javax.swing.JFrame {
 
     private CCars cars;
-    private CSerial s;
     private static  boolean connected;
     private JCheckBoxMenuItem[] com_ports;
     private JCheckBox[] chRacers;
@@ -46,6 +46,7 @@ public class WMainFrame extends javax.swing.JFrame {
          */
         addComm();
         this.setVisible(true);
+        addRacers();
     }
     
     public javax.swing.JMenu getComMenu(){
@@ -92,9 +93,9 @@ public class WMainFrame extends javax.swing.JFrame {
                         }
                     }
                 }
-                s = new CSerial(cars);
+                cars.serial = new CSerial(cars);
                 try {
-                    s.connect(cPort);
+                    cars.serial.connect(cPort);
                 } catch (Exception ex) {
                     Logger.getLogger(RunCars.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -254,7 +255,8 @@ public class WMainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
-        new WRacers(cars);
+        WRacers racers = new WRacers(cars);
+        
     }//GEN-LAST:event_jMenuItem5ActionPerformed
 
     private void jMenuItem6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem6ActionPerformed
@@ -303,6 +305,9 @@ public class WMainFrame extends javax.swing.JFrame {
         t.start();
    }
     
+    public void redrawRacersPanel(){
+        
+    }
     
    public void openRaceWindow(LinkedList<CRacer> racers_list, EClass category){
        wRace = new WRace(cars,category,racers_list);

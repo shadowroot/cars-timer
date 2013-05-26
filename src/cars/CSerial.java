@@ -74,7 +74,7 @@ public class CSerial
                         Logger.getLogger(CSerial.class.getName()).log(Level.INFO, null, "[+] Sync serial");
                     }
                     else if(buffer[0] == 'A' ){
-                        cars.nextLap();
+                        cars.nextBreak();
                         Logger.getLogger(CSerial.class.getName()).log(Level.INFO, null, "[+] Line break");
                         ok=true;
                     }

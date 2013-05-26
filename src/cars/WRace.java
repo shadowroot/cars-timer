@@ -9,8 +9,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
+import javax.swing.JLabel;
+import javax.swing.JTable;
 import javax.swing.Timer;
 
 /**
@@ -24,8 +29,11 @@ public class WRace extends javax.swing.JFrame implements KeyListener {
     private CRace race;
     private EClass category;
     private LinkedList<CRacer> racers;
+    private Map<CRacer,LinkedList<JLabel> > racers_labels;
     private int key = 0;
     private boolean modify = false;
+    private boolean raceReady = false;
+    private ArrayList<JLabel> racersLabels;
     
     
     /**
@@ -36,10 +44,11 @@ public class WRace extends javax.swing.JFrame implements KeyListener {
         this.cars = cars;
         this.category = category;
         this.racers = racers;
-        
+        racers_labels = new HashMap<CRacer, LinkedList<JLabel>>();
         this.setVisible(true);
         jLabel1.setText("");
         setDefaultCloseOperation(HIDE_ON_CLOSE);
+        racersLabels = new ArrayList<JLabel>();
     }
 
     /**
@@ -172,15 +181,48 @@ public class WRace extends javax.swing.JFrame implements KeyListener {
         modify = false;
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    
     private  void start_race(){
         start = (new Date()).getTime();
-        race = new CRace(category, racers);
+        race = new CRace(cars.race_id++,category, racers);
+        cars.current_race = race;
         paint_time();
     }
    
-    public void resolveRace(){
-        
+    /**
+     * Drawing panels with results
+     * every result 
+     */
+    public void redrawRacersPanel(){
+        int index = 0;
+        if(!raceReady){
+            int top = 0;
+            for(int i = 0; i < race.racers.size(); i++){
+                JLabel lab = new JLabel();
+                lab.setText("");
+                lab.setAlignmentY(top);
+                //alignment
+                top += 15;
+                racersLabels.add(lab);
+                racersPanel.add(lab);
+            }
+            raceReady = true;
+        }
+        String line = null;;
+        line = "ID\tJméno\t";
+        for(int i = 1; i < race.totalLaps; i++){
+            line += ""+ i + "\t";
+        }
+        racersLabels.get(index).setText(line);
+        index++;
+        for(CRacer racer : race.racers){
+            line = race.getLapTimes(racer);
+            racersLabels.get(index).setText(line);
+            index++;
+        }
+        racersPanel.repaint();
     }
+    
     
     private  void paint_time(){
         Timer t = new Timer(10, new ActionListener() {
@@ -201,6 +243,10 @@ public class WRace extends javax.swing.JFrame implements KeyListener {
                     h="";
                 }
                 timeLabel.setText(h+""+minutes+":"+seconds+"."+milis);
+                
+                //prekresleni vysledkovky
+                redrawRacersPanel();
+                
             }
         });
         t.start();
@@ -253,9 +299,10 @@ public class WRace extends javax.swing.JFrame implements KeyListener {
             int u = key - '0';
             if(modify){
                 this.key = u;
+                cars.current_race.modify(cars.racers.get(u), cars.lastLap);
             }
             else{
-                cars.keys = u;
+                cars.nextLap(cars.racers.get(u));
             }
         }
         

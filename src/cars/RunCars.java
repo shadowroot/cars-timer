@@ -20,7 +20,6 @@ public class RunCars{
     private static JCheckBoxMenuItem[] com_ports;
 
     static private CCars cars;
-    static private CSerial s;
 
     public RunCars(){
         

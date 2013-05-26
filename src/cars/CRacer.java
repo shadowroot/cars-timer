@@ -4,9 +4,7 @@
  */
 package cars;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -79,12 +77,9 @@ public class CRacer implements Serializable{
         ret += firstname + ",";
         ret += surname + ",";
         for(EClass c : classes){
-            
-            
+            ret += c.getName() + ":";
         }
         return ret;
     }
-    
-    
-    
+
 }

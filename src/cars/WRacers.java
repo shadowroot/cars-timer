@@ -8,15 +8,13 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 /**
  *
  * @author jonny
  */
 public class WRacers extends javax.swing.JFrame {
-private  String[] credentials=null;
-private  int limit=3;
 private CCars cars;
-private static long id = 0;
 
     
     /**
@@ -131,7 +129,7 @@ private static long id = 0;
     }// </editor-fold>//GEN-END:initComponents
 
     private void SubmitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SubmitActionPerformed
-            CRacer racer = new CRacer(id,jTextField1.getText(), jTextField2.getText());
+            CRacer racer = new CRacer(cars.racer_id,jTextField1.getText(), jTextField2.getText());
             if(jCheckBox1.isSelected()){
                 racer.classes.add(EClass.F103);
             }
@@ -141,10 +139,14 @@ private static long id = 0;
             if(jCheckBox3.isSelected()){
                 racer.classes.add(EClass.Open);
             }
-            racer.classes.add(EClass.Open);
             cars.racers.add(racer);
-            id++;
-        
+            cars.racer_id++;
+            try {
+                cars.writeRacers(cars.csvRacers);
+            } catch (IOException ex) {
+                Logger.getLogger(WRacers.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            cars.main_window.addRacers();
         this.setVisible(false);
     }//GEN-LAST:event_SubmitActionPerformed
 
@@ -167,4 +169,5 @@ private static long id = 0;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
+
 }
