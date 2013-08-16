@@ -5,35 +5,32 @@
 package cars;
 
 
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import javax.swing.GroupLayout;
 import javax.swing.JLabel;
-import javax.swing.JTable;
 import javax.swing.Timer;
 
 /**
  *
  * @author jonny
  */
-public class WRace extends javax.swing.JFrame implements KeyListener {
+public class WRace extends javax.swing.JFrame{
 
     private long start = 0;
     private CCars cars;
-    private CRace race;
     private EClass category;
     private LinkedList<CRacer> racers;
-    private Map<CRacer,LinkedList<JLabel> > racers_labels;
-    private int key = 0;
-    private boolean modify = false;
-    private boolean raceReady = false;
-    private ArrayList<JLabel> racersLabels;
+    private Map<Integer,JLabel> racer_name_label;
+    private Map<Integer,JLabel> racer_laps_label;
+    private HashMap<Integer,CRacer> racers_chart;
+    private LapWatch race;
     
     
     /**
@@ -44,13 +41,48 @@ public class WRace extends javax.swing.JFrame implements KeyListener {
         this.cars = cars;
         this.category = category;
         this.racers = racers;
-        racers_labels = new HashMap<CRacer, LinkedList<JLabel>>();
+        
         this.setVisible(true);
-        jLabel1.setText("");
         setDefaultCloseOperation(HIDE_ON_CLOSE);
-        racersLabels = new ArrayList<JLabel>();
+        
+        race = new LapWatch(racers,this);
+        
+        cars.selectRace(race);
+        
+        racer_laps_label = new HashMap<Integer, JLabel>();
+        racer_name_label = new HashMap<Integer, JLabel>();
+        racers_chart = new HashMap<Integer, CRacer>();
+        int indexes = 1;
+        for (Iterator<CRacer> it = racers.iterator(); it.hasNext();) {
+            CRacer racer = it.next();
+            racer_name_label.put(indexes, new JLabel(racer.Name()));
+            racer_laps_label.put(indexes, new JLabel("0"));
+            racers_chart.put(indexes, racer);
+            indexes++;
+        }
+        fillPanel();
+        paint_time();
     }
 
+    private void fillPanel(){
+        int index = 1;
+        
+        GridLayout layout = new GridLayout(racers.size(), 3);
+        mainPane.setLayout(layout);
+        
+        
+        for(CRacer racer : racers){
+            mainPane.add(new JLabel(""+index+""));
+            mainPane.add(racer_name_label.get(index));
+            mainPane.add(racer_laps_label.get(index));
+            jComboBox1.addItem(""+index+"");
+            index++;
+        }
+        
+        repaint();
+    }
+   
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -63,9 +95,8 @@ public class WRace extends javax.swing.JFrame implements KeyListener {
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         timeLabel = new javax.swing.JLabel();
-        jButton3 = new javax.swing.JButton();
-        racersPanel = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        jComboBox1 = new javax.swing.JComboBox();
+        mainPane = new javax.swing.JPanel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
@@ -89,25 +120,23 @@ public class WRace extends javax.swing.JFrame implements KeyListener {
         timeLabel.setFont(new java.awt.Font("Tahoma", 1, 36)); // NOI18N
         timeLabel.setText(""+new Date().toString()+"");
 
-        jButton3.setText("Opravit");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel());
+        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                jComboBox1ActionPerformed(evt);
             }
         });
 
-        javax.swing.GroupLayout racersPanelLayout = new javax.swing.GroupLayout(racersPanel);
-        racersPanel.setLayout(racersPanelLayout);
-        racersPanelLayout.setHorizontalGroup(
-            racersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 595, Short.MAX_VALUE)
-        );
-        racersPanelLayout.setVerticalGroup(
-            racersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout mainPaneLayout = new javax.swing.GroupLayout(mainPane);
+        mainPane.setLayout(mainPaneLayout);
+        mainPaneLayout.setHorizontalGroup(
+            mainPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 0, Short.MAX_VALUE)
         );
-
-        jLabel1.setText("jLabel1");
+        mainPaneLayout.setVerticalGroup(
+            mainPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 383, Short.MAX_VALUE)
+        );
 
         jMenu1.setText("File");
         jMenuBar1.add(jMenu1);
@@ -124,41 +153,32 @@ public class WRace extends javax.swing.JFrame implements KeyListener {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(mainPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(timeLabel)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(19, 19, 19)
-                                .addComponent(jLabel1)))
-                        .addGap(28, 28, 28)
-                        .addComponent(racersPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButton1)
-                        .addGap(32, 32, 32)
-                        .addComponent(jButton2)
-                        .addGap(35, 35, 35)
-                        .addComponent(jButton3)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addComponent(jButton1)
+                                .addGap(32, 32, 32)
+                                .addComponent(jButton2)
+                                .addGap(18, 18, 18)
+                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 623, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(34, 34, 34)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(timeLabel)
-                        .addGap(39, 39, 39)
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 341, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButton1)
-                            .addComponent(jButton2)
-                            .addComponent(jButton3))
-                        .addGap(29, 29, 29))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(racersPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(63, 63, 63))))
+                .addGap(22, 22, 22)
+                .addComponent(timeLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(mainPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2)
+                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(29, 29, 29))
         );
 
         pack();
@@ -169,59 +189,30 @@ public class WRace extends javax.swing.JFrame implements KeyListener {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        start = (new Date()).getTime();
-        start_race();
+
+        int r = jComboBox1.getSelectedIndex() + 1;
+        race.setActiveRacer(racers_chart.get(r));
+        race.startRace();
     }//GEN-LAST:event_jButton2ActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        modify = true;
-        while(key == 0){}
-        race.modify(racers.get(key), cars.lastLap);
-        key = 0;
-        modify = false;
-    }//GEN-LAST:event_jButton3ActionPerformed
+    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+        
+    }//GEN-LAST:event_jComboBox1ActionPerformed
 
-    
-    private  void start_race(){
-        start = (new Date()).getTime();
-        race = new CRace(cars.race_id++,category, racers);
-        cars.current_race = race;
-        paint_time();
-    }
    
     /**
      * Drawing panels with results
      * every result 
      */
-    public void redrawRacersPanel(){
-        int index = 0;
-        if(!raceReady){
-            int top = 0;
-            for(int i = 0; i < race.racers.size(); i++){
-                JLabel lab = new JLabel();
-                lab.setText("");
-                lab.setAlignmentY(top);
-                //alignment
-                top += 15;
-                racersLabels.add(lab);
-                racersPanel.add(lab);
-            }
-            raceReady = true;
+    public void revalidateValues(){
+        racers_chart =  race.getPositions();
+        for(int index = 1; index <= racers.size(); index++){
+            CRacer racer = racers_chart.get(index);
+            racer_name_label.get(index).setText(racer.Name());
+            racer_laps_label.get(index).setText(race.getLaps(racer).getLapTimes());
         }
-        String line = null;;
-        line = "ID\tJméno\t";
-        for(int i = 1; i < race.totalLaps; i++){
-            line += ""+ i + "\t";
-        }
-        racersLabels.get(index).setText(line);
-        index++;
-        for(CRacer racer : race.racers){
-            line = race.getLapTimes(racer);
-            racersLabels.get(index).setText(line);
-            index++;
-        }
-        racersPanel.repaint();
     }
+   
     
     
     private  void paint_time(){
@@ -229,24 +220,22 @@ public class WRace extends javax.swing.JFrame implements KeyListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                Date t = new Date();
-                long now = t.getTime()-start;
-                long milis = now%1000;
-                String h = new String();
-                long hours = (((now/1000)/60)/60)%24;
-                long seconds = (now/1000)%60;
-                long minutes = ((now/1000)/60)%60;
-                if(hours>0 && hours<1){
-                    h = hours+":";
+                if(race.isRacing()){
+                    Date t = new Date();
+                    long now = t.getTime()-race.getStartTime();
+                    long milis = now%1000;
+                    String h = new String();
+                    long hours = (((now/1000)/60)/60)%24;
+                    long seconds = (now/1000)%60;
+                    long minutes = ((now/1000)/60)%60;
+                    if(hours>0 && hours<1){
+                        h = hours+":";
+                    }
+                    else{
+                        h="";
+                    }
+                    timeLabel.setText(h+""+minutes+":"+seconds+"."+milis);
                 }
-                else{
-                    h="";
-                }
-                timeLabel.setText(h+""+minutes+":"+seconds+"."+milis);
-                
-                //prekresleni vysledkovky
-                redrawRacersPanel();
-                
             }
         });
         t.start();
@@ -259,70 +248,15 @@ public class WRace extends javax.swing.JFrame implements KeyListener {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private static javax.swing.JLabel jLabel1;
+    private javax.swing.JComboBox jComboBox1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
-    private static javax.swing.JPanel racersPanel;
+    private javax.swing.JPanel mainPane;
     private static javax.swing.JLabel timeLabel;
     // End of variables declaration//GEN-END:variables
-    public  void serial(){
-        jLabel1.setText("Zmáčkněte číslo závodníka ....");
-        
-    }
-   
-    
-    
-    @Override
-    public void keyPressed(KeyEvent e) {
-    }
-    /*
-     * @Override public void keyReleased(KeyEvent e) { throw new
-     * UnsupportedOperationException("Not supported yet."); }
-     *
-     */
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        
-        char key = e.getKeyChar();
-        if (key == '`' || key == '~' || key == ';') {
-            jLabel1.setText("Zmáčkněte číslo závodníka ....");
-        }
-        //Numbers
-        if ((key >= '1' && key <= '9')) {
-            int u = key - '0';
-            if(modify){
-                this.key = u;
-                cars.current_race.modify(cars.racers.get(u), cars.lastLap);
-            }
-            else{
-                cars.nextLap(cars.racers.get(u));
-            }
-        }
-        
-    }
-    /*
-     * Takes a timestamp
-     * Returns String
-     */
-    private  String determineTime(long stamp){
-        String time = new String();
-        long milis = stamp%1000;
-        long sec = (stamp/1000)%60;
-        long min = ((stamp/1000)/60)%60;
-        long hour = (((stamp/1000)/60)/60)%24;
-        if(hour > 0){time += ""+hour+":";}
-        if(min > 0){time += ""+min+":";}
-        if(sec > 0){time += ""+sec+".";}
-        if(milis > 0){time += ""+milis+"";}
-        return time;
-    }
+  
     
     
 }

@@ -21,7 +21,7 @@ import java.util.TreeSet;
 
 public class CCars {
 public ArrayList<CRacer> racers = new ArrayList<CRacer>();
-public CRace current_race;
+public RaceInterface current_race;
 public  String csvRacers = "racers.csv";
 private String csvRaceHistory = "race.csv";
 private ArrayList<CRace> history = new ArrayList<CRace>();
@@ -31,6 +31,7 @@ public long race_id = 0;
 public int keys = 0;
 public CSerial serial;
 public WMainFrame main_window;
+public int race_type = 1;
 
 
     public CCars() throws IOException{
@@ -71,6 +72,10 @@ public WMainFrame main_window;
     public void addRacer(CRacer racer){
        racers.add(racer);
         
+    }
+    
+    public void selectRace(RaceInterface r){
+        current_race = r;
     }
     
     
@@ -185,12 +190,8 @@ public WMainFrame main_window;
         history.add(crace);
     }
     
-    public void nextBreak(){
-        lastLap = (new Date()).getTime();
-    }
-    
-    public void nextLap(CRacer racer){
-        current_race.nextLap(racer, lastLap);
+    public void nextLap(){
+        current_race.lapBreak();
     }
     
     public  void initRacers() throws IOException{

@@ -6,6 +6,7 @@ import gnu.io.SerialPort;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,11 +16,23 @@ import java.util.logging.Logger;
 public class CSerial
 {
     private CCars cars;
+    private String mPortName;
+    private String mStatus;
     public CSerial(CCars cars)
     {
          this.cars = cars;
     }
 
+    public ArrayList<String> getList(){
+        ArrayList<String> list = new ArrayList<String>();
+        
+        return list;
+    }
+    
+    public String getStatus(){
+        return mStatus;
+    }
+    
     
     void connect ( String portName ) throws Exception
     {
@@ -64,26 +77,26 @@ public class CSerial
         public void run ()
         {
             boolean ok =true;
-            byte[] buffer = new byte[1];
+            char data = 0;
+            char last = 0;
             int len = -1;
             try
             {
-                while ( ( len = this.in.read(buffer)) > -1 && ok )
+                while ( ( data = (char)this.in.read()) > -1 && ok )
                 {
-                    if(buffer[0] == 'B'){
-                        Logger.getLogger(CSerial.class.getName()).log(Level.INFO, null, "[+] Sync serial");
-                    }
-                    else if(buffer[0] == 'A' ){
-                        cars.nextBreak();
+                    if(data == 'B' && last != 'B'){
+                        cars.nextLap();
                         Logger.getLogger(CSerial.class.getName()).log(Level.INFO, null, "[+] Line break");
                         ok=true;
+                        last = data;
                     }
-                    else{
-                        ok = false;
-                        System.err.println("Problem");
+                    else if(data == 'A' && last != 'A'){
+                        ok = true;
+                        last = data;
                     }
+                    //System.out.println(""+data);
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(10);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(CSerial.class.getName()).log(Level.SEVERE, null, ex);
                     }

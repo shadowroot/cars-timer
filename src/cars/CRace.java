@@ -17,7 +17,7 @@ import java.util.TreeSet;
  * Race holding map of laps and their lap times. By getting size of list gets laps laps. Unconfirmed is last time to do a correction.
  * @author jonny
  */
-public class CRace {
+public class CRace implements RaceInterface{
     private EClass category;
     private Map<CRacer, SortedSet<Long> > laps;
     public Long raceStart;
@@ -143,6 +143,11 @@ public class CRace {
         }
         ret += "\n";
         return ret;
+    }
+
+    @Override
+    public void lapBreak() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     

@@ -4,19 +4,18 @@
  */
 package cars;
 
-import gnu.io.CommPortIdentifier;
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenuItem;
 
 /**
  *
  * @author jonny
  */
 public class RunCars{
+    
+    
     private static JCheckBoxMenuItem[] com_ports;
 
     static private CCars cars;

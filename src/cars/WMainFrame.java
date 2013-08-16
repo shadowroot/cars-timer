@@ -47,6 +47,8 @@ public class WMainFrame extends javax.swing.JFrame {
         addComm();
         this.setVisible(true);
         addRacers();
+        init();
+        
     }
     
     public javax.swing.JMenu getComMenu(){
@@ -59,6 +61,7 @@ public class WMainFrame extends javax.swing.JFrame {
         jComboBox1.addItem(EClass.F103);
         jComboBox1.addItem(EClass.C4X4);
         jComboBox1.addItem(EClass.Open);
+        
         
     }
     
@@ -310,6 +313,7 @@ public class WMainFrame extends javax.swing.JFrame {
     }
     
    public void openRaceWindow(LinkedList<CRacer> racers_list, EClass category){
+       
        wRace = new WRace(cars,category,racers_list);
    }
     
@@ -317,7 +321,7 @@ public class WMainFrame extends javax.swing.JFrame {
         LinkedList<CRacer> list = new LinkedList<CRacer>();
         EClass model_class = (EClass) jComboBox1.getSelectedItem();
         for(int i=0;i<chRacers.length;i++){
-            if(chRacers[i].isSelected() && cars.racers.get(i).classes.contains(model_class)){
+            if(chRacers[i].isSelected()){
                 list.add(cars.racers.get(i));
             }
         }
