@@ -13,52 +13,50 @@ import java.util.Date;
  */
 public class CLaps {
     private long last = 0;
-    private long best = 0;
     private ArrayList<Long> lap_times;
+    private int laps = 0;
     private Date date;
+    
     
     CLaps(){
         lap_times = new ArrayList<Long>();
         date = new Date();
     }
     
+    public int getLapsCount(){
+        return laps;
+    }
+    
     public void addLap(long lap_time){
+        lap_times.add(lap_time - last);
         last = lap_time;
-        lap_times.add(lap_time);
+        laps++;
     }
     
-    public long calculateBetween(long first,long second){
-        return (first - second);
-    }
-    
-    public long getBest(){
-        long min = Long.MAX_VALUE;
-        for(long lap : lap_times){
-            if(lap < min){
-                min = lap;
-            }
+    public boolean testLap(long time){
+        if((time - last) < 5000){
+            return false;
         }
-        return min;
+        return true;
+    }
+
+    public String getLapTimes(){
+        String ret = "";
+        for( long lap : lap_times ){
+                ret += "\t" + formatTime(lap) + "";
+        }
+        return ret;
+    }
+    
+    public boolean finished(long time){
+        if(last >= time || last + 2 * 60 * 1000 <= time){
+            return true;
+        }
+        return false;
     }
     
     public long getLast(){
         return last;
-    }
-    
-    public String getLapTimes(){
-        String ret = "<html>";
-        ret += "\t|<i> " + getLast() + " </i>| " + "\t||<b> " + getBest() + " </b>||";
-        for( long lap : lap_times ){
-            if(lap == best){
-                ret += "\t<b>" + lap + "</b>";
-            }
-            else{
-                ret += "\t" + lap;
-            }
-            
-        }
-        ret += "</html>";
-        return ret;
     }
     
     public String formatTime(long  time){
@@ -90,10 +88,6 @@ public class CLaps {
     
     public ArrayList<Long> getArray(){
         return lap_times;
-    }
-    
-    public void save(String filename){
-        
     }
     
 }

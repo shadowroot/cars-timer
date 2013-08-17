@@ -313,7 +313,6 @@ public class WMainFrame extends javax.swing.JFrame {
     }
     
    public void openRaceWindow(LinkedList<CRacer> racers_list, EClass category){
-       
        wRace = new WRace(cars,category,racers_list);
    }
     

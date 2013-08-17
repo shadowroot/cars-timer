@@ -5,15 +5,25 @@
 package cars;
 
 
-import java.awt.GridLayout;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import javax.swing.GroupLayout;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JLabel;
 import javax.swing.Timer;
 
@@ -24,60 +34,96 @@ import javax.swing.Timer;
 public class WRace extends javax.swing.JFrame{
 
     private long start = 0;
+    private long end = 0;
     private CCars cars;
     private EClass category;
     private LinkedList<CRacer> racers;
-    private Map<Integer,JLabel> racer_name_label;
-    private Map<Integer,JLabel> racer_laps_label;
-    private HashMap<Integer,CRacer> racers_chart;
-    private LapWatch race;
+    private Map<Integer,CRacer> racers_chart;
+    private Map<CRacer,Integer> racers_indexes;
+    private CRace race;
+    private Set<Integer> finished;
+    private Timer time;
     
     
     /**
      * Creates new form Race
      */
-    public WRace(CCars cars,EClass category, LinkedList<CRacer> racers) {
+    public WRace(CCars cars,EClass category,final LinkedList<CRacer> racs) {
+        setFocusable(true);
+            KeyboardFocusManager.getCurrentKeyboardFocusManager()
+            .addKeyEventDispatcher(new KeyEventDispatcher() {
+                @Override
+                public boolean dispatchKeyEvent(KeyEvent e) {
+                    char key = e.getKeyChar();  
+                    if(race.isRacing()){
+                        if(e.getID() == KeyEvent.KEY_PRESSED){
+                            if ((key >= '1' && key <= '9')) {
+                                int u = key - '0' - 1;
+                                if(race.isQueued() && u <= racers.size()){
+                                    if(race.getLaps(racers.get(u)).finished(end) && !finished.contains(u)){
+                                        finished.add(u);
+                                    }
+                                    race.chooseLap(racers.get(u));
+                                    revalidateValues();
+                                }
+                            }
+                        }
+                              
+                      }
+                    System.out.println(""+key);
+                  return false;
+                }
+          });
         initComponents();
         this.cars = cars;
         this.category = category;
-        this.racers = racers;
+        this.racers = racs;
+        
+        finished = new HashSet<Integer>();
         
         this.setVisible(true);
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         
-        race = new LapWatch(racers,this);
+        race = new CRace(racers,this);
         
         cars.selectRace(race);
+        racers_indexes = new HashMap<CRacer, Integer>();
         
-        racer_laps_label = new HashMap<Integer, JLabel>();
-        racer_name_label = new HashMap<Integer, JLabel>();
         racers_chart = new HashMap<Integer, CRacer>();
+        
         int indexes = 1;
         for (Iterator<CRacer> it = racers.iterator(); it.hasNext();) {
             CRacer racer = it.next();
-            racer_name_label.put(indexes, new JLabel(racer.Name()));
-            racer_laps_label.put(indexes, new JLabel("0"));
             racers_chart.put(indexes, racer);
+            racers_indexes.put(racer, indexes);
             indexes++;
         }
-        fillPanel();
+        racersResults.setVerticalTextPosition(JLabel.TOP);
+        racersResults.setHorizontalTextPosition(JLabel.LEFT);
+        redrawPanel();
         paint_time();
+        
     }
 
-    private void fillPanel(){
-        int index = 1;
+    private void redrawPanel(){
+        String text = "<html>";
+        text += "<table>";
+        text += "<tr><td>Pozice</td><td>Index</td><td>Jméno</td><td>Kola</td>";
+        text += "</tr>";
         
-        GridLayout layout = new GridLayout(racers.size(), 3);
-        mainPane.setLayout(layout);
-        
-        
-        for(CRacer racer : racers){
-            mainPane.add(new JLabel(""+index+""));
-            mainPane.add(racer_name_label.get(index));
-            mainPane.add(racer_laps_label.get(index));
-            jComboBox1.addItem(""+index+"");
-            index++;
+        for(int index = 1; index <= racers.size(); index++){
+            text += "<tr>";
+            text += "<td>" + index + "</td>";
+            text += "<td>" + racers_indexes.get(racers_chart.get(index)) + "</td>";
+            text += "<td>" + racers_chart.get(index).Name() + "</td>";
+            CLaps laps = race.getLaps(racers_chart.get(index));
+            text += "<td>" + laps.getLapTimes() + "</td>";
+            text += "</tr>";
         }
+        text += "</table>";
+        text += "</html>";
+        
+        racersResults.setText(text);
         
         repaint();
     }
@@ -95,8 +141,8 @@ public class WRace extends javax.swing.JFrame{
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         timeLabel = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox();
-        mainPane = new javax.swing.JPanel();
+        timeSetup = new javax.swing.JComboBox();
+        racersResults = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
@@ -120,23 +166,9 @@ public class WRace extends javax.swing.JFrame{
         timeLabel.setFont(new java.awt.Font("Tahoma", 1, 36)); // NOI18N
         timeLabel.setText(""+new Date().toString()+"");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel());
-        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox1ActionPerformed(evt);
-            }
-        });
+        timeSetup.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "7","1","2","3","4","5","6","8","9" }));
 
-        javax.swing.GroupLayout mainPaneLayout = new javax.swing.GroupLayout(mainPane);
-        mainPane.setLayout(mainPaneLayout);
-        mainPaneLayout.setHorizontalGroup(
-            mainPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
-        mainPaneLayout.setVerticalGroup(
-            mainPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 383, Short.MAX_VALUE)
-        );
+        racersResults.setText("");
 
         jMenu1.setText("File");
         jMenuBar1.add(jMenu1);
@@ -153,7 +185,7 @@ public class WRace extends javax.swing.JFrame{
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(mainPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(racersResults, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(timeLabel)
@@ -162,7 +194,7 @@ public class WRace extends javax.swing.JFrame{
                                 .addGap(32, 32, 32)
                                 .addComponent(jButton2)
                                 .addGap(18, 18, 18)
-                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(timeSetup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 623, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -171,13 +203,13 @@ public class WRace extends javax.swing.JFrame{
             .addGroup(layout.createSequentialGroup()
                 .addGap(22, 22, 22)
                 .addComponent(timeLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(mainPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(racersResults, javax.swing.GroupLayout.PREFERRED_SIZE, 377, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton2)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(timeSetup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(29, 29, 29))
         );
 
@@ -185,44 +217,60 @@ public class WRace extends javax.swing.JFrame{
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        this.setVisible(false);
+        try {
+            kill();
+        } catch (IOException ex) {
+            Logger.getLogger(WRace.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-
-        int r = jComboBox1.getSelectedIndex() + 1;
-        race.setActiveRacer(racers_chart.get(r));
+        start = (new Date()).getTime();
+        end = start + (Long.parseLong((String)timeSetup.getSelectedItem()) * 60 * 1000);
         race.startRace();
     }//GEN-LAST:event_jButton2ActionPerformed
 
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
-        
-    }//GEN-LAST:event_jComboBox1ActionPerformed
-
    
+    private void kill() throws IOException{
+        time.stop();
+        time = null;
+        race = null;
+        export();
+        this.hide();
+    }
+    
+    
     /**
      * Drawing panels with results
      * every result 
      */
     public void revalidateValues(){
-        racers_chart =  race.getPositions();
-        for(int index = 1; index <= racers.size(); index++){
-            CRacer racer = racers_chart.get(index);
-            racer_name_label.get(index).setText(racer.Name());
-            racer_laps_label.get(index).setText(race.getLaps(racer).getLapTimes());
-        }
+        racers_chart = race.getPositions();
+        redrawPanel();
     }
    
     
     
     private  void paint_time(){
-        Timer t = new Timer(10, new ActionListener() {
+        time = new Timer(10, new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(race.isRacing()){
                     Date t = new Date();
-                    long now = t.getTime()-race.getStartTime();
+                    long now = end - t.getTime();
+                    if(now <= 0){
+                        race.stopRace();
+                    }
+                    if(finished.size() >= racers.size()){
+                        race.finish();
+                        try {
+                            export();
+                        } catch (IOException ex) {
+                            Logger.getLogger(WRace.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        time.stop();
+                    }
                     long milis = now%1000;
                     String h = new String();
                     long hours = (((now/1000)/60)/60)%24;
@@ -238,7 +286,7 @@ public class WRace extends javax.swing.JFrame{
                 }
             }
         });
-        t.start();
+        time.start();
     }
     
     
@@ -248,15 +296,45 @@ public class WRace extends javax.swing.JFrame{
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JComboBox jComboBox1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPanel mainPane;
+    private javax.swing.JLabel racersResults;
     private static javax.swing.JLabel timeLabel;
+    private javax.swing.JComboBox timeSetup;
     // End of variables declaration//GEN-END:variables
 
-  
+    
+    public void export() throws IOException{
+        String plain = "";
+        String text = "<html>\n";
+        text += "<table>\n";
+        text += "<tr><td>Pozice</td><td>Index</td><td>Jméno</td><td>Kola</td>";
+        text += "</tr>\n";
+        
+        for(int index = 1; index <= racers.size(); index++){
+            text += "<tr>";
+            text += "<td>" + index + "</td>";
+            text += "<td>" + racers_indexes.get(racers_chart.get(index)) + "</td>";
+            text += "<td>" + racers_chart.get(index).Name() + "</td>";
+            CLaps laps = race.getLaps(racers_chart.get(index));
+            text += "<td>" + laps.getLapTimes() + "</td>";
+            text += "</tr>\n";
+            plain += racers_chart.get(index).getID() + "\t" +
+                    racers_chart.get(index).Name() + "\t" + 
+                    laps.getLapTimes() + "\n";
+        }
+        text += "</table>";
+        text += "</html>\n";
+        FileWriter w = new FileWriter(""+new Date().getTime() + ".html");
+        
+        w.write(text);
+        
+        FileWriter wp = new FileWriter(""+new Date().getTime() + ".txt");
+        wp.write(plain);
+        w.close();
+        wp.close();
+    }
     
     
 }

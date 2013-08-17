@@ -50,20 +50,7 @@ public int race_type = 1;
         firstname = params[0];
         surname = params[1];
         CRacer r = new CRacer(racer_id++, firstname, surname);
-        String[] categories = params[2].split(":");
-        for(String cat : categories){
-            
-            if(cat == "4x4"){
-                r.classes.add(EClass.C4X4);
-            }
-            else if(cat == "Open"){
-                r.classes.add(EClass.Open);
-            }
-            else if(cat == "F103"){
-                r.classes.add(EClass.F103);
-            }
-        }
-        boolean add = racers.add(r);
+        racers.add(r);
     }
     /**
      * 
@@ -185,9 +172,6 @@ public int race_type = 1;
             }
             laps.put(this.racers.get(Integer.parseInt(row[0])), times);
         }
-        CRace crace = new CRace(Long.parseLong(head[0]),category ,racers,laps);
-        crace.raceStart = Long.parseLong(head[1]);
-        history.add(crace);
     }
     
     public void nextLap(){

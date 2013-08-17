@@ -6,11 +6,8 @@ package cars;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -22,7 +19,6 @@ public class CRacer implements Serializable{
     private String firstname;
     private String surname;
     public List<EClass> classes;
-    public Map<Date,CRace> raceHistory;
     /**
      * 
      * @param id
@@ -34,15 +30,6 @@ public class CRacer implements Serializable{
         this.firstname = firstname;
         this.surname = surname;
         classes = new LinkedList<EClass>();
-        raceHistory = new HashMap<Date, CRace>();
-    }
-    /**
-     * Adding race
-     * @param date
-     * @param race 
-     */
-    public void addRace(Date date,CRace race){
-        raceHistory.put(date, race);
     }
     /**
      * Adding classes
@@ -56,9 +43,6 @@ public class CRacer implements Serializable{
      * @param date Date of race.
      * @return 
      */
-    public CRace getRace(Date date){
-        return raceHistory.get(date);
-    }
     
     public String getFirstname(){
         return firstname;
@@ -82,4 +66,7 @@ public class CRacer implements Serializable{
         return ret;
     }
 
+    public long getID(){
+        return id;
+    }
 }
