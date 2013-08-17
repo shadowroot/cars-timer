@@ -16,6 +16,7 @@ public class CLaps {
     private ArrayList<Long> lap_times;
     private int laps = 0;
     private Date date;
+    private long max = 0;
     
     
     CLaps(){
@@ -32,9 +33,15 @@ public class CLaps {
         return laps;
     }
     
+    public long getLapScore(){
+        return max;
+    }
+    
     public void addLap(long lap_time){
-        lap_times.add(lap_time - last);
+        long time = lap_time - last;
+        lap_times.add(time);
         last = lap_time;
+        max += time;
         laps++;
     }
     

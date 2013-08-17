@@ -86,25 +86,27 @@ public class CRace implements RaceInterface{
     }
     
     public HashMap<Integer,CRacer> getPositions(){
-        long min = Long.MAX_VALUE;
+        long min = 0;
         int count = 0;
         CRacer minRacer = null;
         List<CRacer> rac = new LinkedList<CRacer>(this.racers);
         HashMap<Integer,CRacer> pos = new HashMap<Integer,CRacer>();
+        
         for(int index = 1; index <= racers.size(); index++){
+            min = 0;
+            count = 0;
             for(CRacer racer : rac){
-                if(laps.get(racer).getLast() > count){
+                if(laps.get(racer).getLapsCount() > count){
                     count = laps.get(racer).getLapsCount();
+                    min = laps.get(racer).getLapScore();
                     minRacer = racer;
-                    min = laps.get(racer).getLast();
                 }
-                else if(laps.get(racer).getLapsCount() == count && laps.get(racer).getLast() < min){
-                    minRacer = racer;
-                    min = laps.get(racer).getLast();
-                }
-                else{
-                    minRacer = racer;
-                    min = laps.get(racer).getLast();
+                else if(laps.get(racer).getLapsCount() == count){
+                    if(laps.get(racer).getLapScore() < min){
+                        count = laps.get(racer).getLapsCount();
+                        min = laps.get(racer).getLapScore();
+                        minRacer = racer;
+                    }
                 }
             }
             pos.put(index, minRacer);
