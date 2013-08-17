@@ -18,7 +18,6 @@ import java.util.Queue;
 public class CRace implements RaceInterface{
     private List<CRacer> racers;
     private Map<CRacer,CLaps > laps;
-    private CRacer current_racer;
     private long race_start_time;
     private long race_stop_time;
     private boolean race_started = false;
@@ -31,20 +30,18 @@ public class CRace implements RaceInterface{
         this.wrace = wrace;
         this.racers = racers;
         laps = new HashMap<CRacer, CLaps>();
+        lap_queue = new LinkedList<Long>();
         for(CRacer racer : racers){
             laps.put(racer, new CLaps());
         }
-        lap_queue = new LinkedList<Long>();
-    }
-    
-    
-    public void setActiveRacer(CRacer racer){
-        current_racer = racer;
     }
     
     public void startRace(){
         race_start_time = (new Date()).getTime();
         race_started = true;
+        for(CRacer racer : racers){
+            laps.get(racer).setStartTime(race_start_time);
+        }
     }
     
     public boolean isRacing(){
@@ -90,13 +87,13 @@ public class CRace implements RaceInterface{
     
     public HashMap<Integer,CRacer> getPositions(){
         long min = Long.MAX_VALUE;
-        int count = Integer.MAX_VALUE;
+        int count = 0;
         CRacer minRacer = null;
-        List<CRacer> racers = this.racers;
+        List<CRacer> rac = new LinkedList<CRacer>(this.racers);
         HashMap<Integer,CRacer> pos = new HashMap<Integer,CRacer>();
         for(int index = 1; index <= racers.size(); index++){
-            for(CRacer racer : racers){
-                if(laps.get(racer).getLapsCount() > count){
+            for(CRacer racer : rac){
+                if(laps.get(racer).getLast() > count){
                     count = laps.get(racer).getLapsCount();
                     minRacer = racer;
                     min = laps.get(racer).getLast();
@@ -105,9 +102,13 @@ public class CRace implements RaceInterface{
                     minRacer = racer;
                     min = laps.get(racer).getLast();
                 }
+                else{
+                    minRacer = racer;
+                    min = laps.get(racer).getLast();
+                }
             }
             pos.put(index, minRacer);
-            racers.remove(minRacer);
+            rac.remove(minRacer);
         }
         
         return pos;

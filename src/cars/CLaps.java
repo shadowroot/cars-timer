@@ -21,6 +21,11 @@ public class CLaps {
     CLaps(){
         lap_times = new ArrayList<Long>();
         date = new Date();
+        last = date.getTime();
+    }
+    
+    public void setStartTime(long time){
+        last = time;
     }
     
     public int getLapsCount(){
@@ -34,7 +39,7 @@ public class CLaps {
     }
     
     public boolean testLap(long time){
-        if((time - last) < 5000){
+        if((time - last) < 2000){
             return false;
         }
         return true;
@@ -49,7 +54,7 @@ public class CLaps {
     }
     
     public boolean finished(long time){
-        if(last >= time || last + 2 * 60 * 1000 <= time){
+        if(last >= time || last + 2 * 60 * 1000 >= time){
             return true;
         }
         return false;

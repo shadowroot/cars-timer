@@ -10,11 +10,8 @@ import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,7 +48,7 @@ public class WRace extends javax.swing.JFrame{
     public WRace(CCars cars,EClass category,final LinkedList<CRacer> racs) {
         setFocusable(true);
             KeyboardFocusManager.getCurrentKeyboardFocusManager()
-            .addKeyEventDispatcher(new KeyEventDispatcher() {
+                .addKeyEventDispatcher(new KeyEventDispatcher() {
                 @Override
                 public boolean dispatchKeyEvent(KeyEvent e) {
                     char key = e.getKeyChar();  
@@ -70,7 +67,6 @@ public class WRace extends javax.swing.JFrame{
                         }
                               
                       }
-                    System.out.println(""+key);
                   return false;
                 }
           });
@@ -233,8 +229,6 @@ public class WRace extends javax.swing.JFrame{
    
     private void kill() throws IOException{
         time.stop();
-        time = null;
-        race = null;
         export();
         this.hide();
     }
